@@ -1,0 +1,23 @@
+# FlowSpec CLI 代码所有者
+
+# 全局所有者
+* @maintainers
+
+# 核心代码
+/cmd/ @maintainers
+/internal/ @maintainers
+
+# CI/CD 配置
+/.github/ @maintainers
+/Makefile @maintainers
+/.golangci.yml @maintainers
+
+# 文档
+/README.md @maintainers
+/CONTRIBUTING.md @maintainers
+
+# 脚本
+/scripts/ @maintainers
+
+# 规约文档
+/.kiro/specs/ @maintainers

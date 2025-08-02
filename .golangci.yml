@@ -1,0 +1,116 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+    - build
+    - testdata
+  skip-files:
+    - ".*_test.go"
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+  
+  gofmt:
+    simplify: true
+  
+  goimports:
+    local-prefixes: flowspec-cli
+  
+  golint:
+    min-confidence: 0.8
+  
+  govet:
+    check-shadowing: true
+    enable-all: true
+  
+  lll:
+    line-length: 120
+  
+  maligned:
+    suggest-new: true
+  
+  misspell:
+    locale: US
+
+linters:
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - errcheck
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - golint
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+
+  disable:
+    - gochecknoglobals
+    - gocognit
+    - gocyclo
+    - godox
+    - interfacer
+    - maligned
+    - prealloc
+    - scopelint
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - lll
+
+    # Exclude known linters from partially hard-to-fix issues
+    - linters:
+        - errcheck
+      text: "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+
+    # Exclude lll issues for long lines with go:generate
+    - linters:
+        - lll
+      source: "^//go:generate "
+
+  # Show only new issues created after git revision `HEAD~1`
+  new-from-rev: HEAD~1
