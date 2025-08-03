@@ -327,7 +327,7 @@ func (ti *DefaultTraceIngestor) convertOTLPSpan(otlpSpan OTLPSpan) (*models.Span
 	// Convert attributes
 	attributes := make(map[string]interface{})
 	for _, attr := range otlpSpan.Attributes {
-		attributes[attr.Key] = attr.Value
+		attributes[attr.Key] = extractAttributeValue(attr.Value)
 	}
 	
 	// Convert status
@@ -346,7 +346,7 @@ func (ti *DefaultTraceIngestor) convertOTLPSpan(otlpSpan OTLPSpan) (*models.Span
 		
 		eventAttrs := make(map[string]interface{})
 		for _, attr := range event.Attributes {
-			eventAttrs[attr.Key] = attr.Value
+			eventAttrs[attr.Key] = extractAttributeValue(attr.Value)
 		}
 		
 		events = append(events, models.SpanEvent{
@@ -394,6 +394,41 @@ func parseNanoTimestamp(timestampStr string) (int64, error) {
 	}
 	
 	return timestamp, nil
+}
+
+// extractAttributeValue extracts the actual value from OTLP attribute value format
+func extractAttributeValue(value interface{}) interface{} {
+	if value == nil {
+		return nil
+	}
+	
+	// If it's already a simple value, return as-is
+	switch v := value.(type) {
+	case string, int, int64, float64, bool:
+		return v
+	case map[string]interface{}:
+		// Handle OTLP wrapped values
+		if stringVal, ok := v["stringValue"]; ok {
+			return stringVal
+		}
+		if intVal, ok := v["intValue"]; ok {
+			return intVal
+		}
+		if doubleVal, ok := v["doubleValue"]; ok {
+			return doubleVal
+		}
+		if boolVal, ok := v["boolValue"]; ok {
+			return boolVal
+		}
+		if bytesVal, ok := v["bytesValue"]; ok {
+			return bytesVal
+		}
+		// If no known wrapper, return the map as-is
+		return v
+	default:
+		// Return unknown types as-is
+		return v
+	}
 }
 
 // convertStatusCode converts OTLP status code to string

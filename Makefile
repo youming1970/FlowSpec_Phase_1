@@ -100,6 +100,35 @@ build-all:
 	GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $(BUILD_DIR)/$(BINARY_NAME)-windows-amd64.exe $(MAIN_PATH)
 	@echo "✅ 多平台构建完成"
 
+# 性能测试相关目标
+performance-test:
+	@echo "运行性能测试..."
+	@if [ -f "scripts/performance-test.sh" ]; then \
+		./scripts/performance-test.sh; \
+	else \
+		echo "⚠️  性能测试脚本未找到"; \
+	fi
+
+performance-tests-only:
+	@echo "仅运行性能测试用例..."
+	go test -v -run "TestLargeScale|TestMemoryUsage|TestConcurrency|TestPerformanceRegression" ./cmd/flowspec-cli/ -timeout 60m
+
+stress-test:
+	@echo "运行压力测试..."
+	go test -v -run "TestStress" ./cmd/flowspec-cli/ -timeout 90m
+
+benchmark:
+	@echo "运行基准测试..."
+	go test -bench=. -benchmem -count=3 ./...
+
+benchmark-cli:
+	@echo "运行 CLI 基准测试..."
+	go test -bench=BenchmarkCLI -benchmem -count=5 ./cmd/flowspec-cli/
+
+performance-monitor:
+	@echo "运行性能监控测试..."
+	go test -v ./internal/monitor/ -timeout 10m
+
 # 显示帮助信息
 help:
 	@echo "可用的 make 目标:"
@@ -117,4 +146,10 @@ help:
 	@echo "  install    - 安装到 GOPATH"
 	@echo "  clean      - 清理构建文件"
 	@echo "  dev        - 构建并运行开发模式"
+	@echo "  performance-test    - 运行完整性能测试套件"
+	@echo "  performance-tests-only - 仅运行性能测试用例"
+	@echo "  stress-test         - 运行压力测试"
+	@echo "  benchmark          - 运行基准测试"
+	@echo "  benchmark-cli      - 运行 CLI 基准测试"
+	@echo "  performance-monitor - 运行性能监控测试"
 	@echo "  help       - 显示此帮助信息"
