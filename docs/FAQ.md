@@ -1,37 +1,37 @@
-# 常见问题解答 (FAQ)
+# Frequently Asked Questions (FAQ)
 
-本文档回答了使用 FlowSpec CLI 过程中的常见问题。
+This document answers common questions about using the FlowSpec CLI.
 
-## 目录
+## Table of Contents
 
-- [安装和配置](#安装和配置)
-- [使用问题](#使用问题)
-- [ServiceSpec 注解](#servicespec-注解)
-- [轨迹数据](#轨迹数据)
-- [性能和优化](#性能和优化)
-- [故障排除](#故障排除)
+- [Installation and Configuration](#installation-and-configuration)
+- [Usage Issues](#usage-issues)
+- [ServiceSpec Annotations](#servicespec-annotations)
+- [Trace Data](#trace-data)
+- [Performance and Optimization](#performance-and-optimization)
+- [Troubleshooting](#troubleshooting)
 
-## 安装和配置
+## Installation and Configuration
 
-### Q: 支持哪些 Go 版本？
+### Q: Which Go versions are supported?
 
-A: FlowSpec CLI 需要 Go 1.21 或更高版本。我们建议使用最新的稳定版本。
+A: The FlowSpec CLI requires Go 1.21 or higher. We recommend using the latest stable version.
 
 ```bash
-# 检查 Go 版本
+# Check Go version
 go version
 
-# 如果版本过低，请升级 Go
+# If the version is too low, please upgrade Go
 ```
 
-### Q: 如何在 CI/CD 中使用 FlowSpec CLI？
+### Q: How can I use the FlowSpec CLI in CI/CD?
 
-A: 可以通过以下方式在 CI/CD 中集成：
+A: You can integrate it into your CI/CD pipeline as follows:
 
 ```yaml
-# GitHub Actions 示例
+# GitHub Actions Example
 - name: Install FlowSpec CLI
-  run: go install github.com/your-org/flowspec-cli/cmd/flowspec-cli@latest
+  run: go install github.com/FlowSpec/flowspec-cli/cmd/flowspec-cli@latest
 
 - name: Run FlowSpec Validation
   run: |
@@ -47,78 +47,78 @@ A: 可以通过以下方式在 CI/CD 中集成：
     path: flowspec-report.json
 ```
 
-### Q: 如何配置日志级别？
+### Q: How do I configure the log level?
 
-A: 使用 `--log-level` 参数：
+A: Use the `--log-level` parameter:
 
 ```bash
-# 调试模式
+# Debug mode
 flowspec-cli align --path=./src --trace=./trace.json --log-level=debug
 
-# 静默模式
+# Silent mode
 flowspec-cli align --path=./src --trace=./trace.json --log-level=error
 ```
 
-## 使用问题
+## Usage Issues
 
-### Q: 为什么没有找到任何 ServiceSpec？
+### Q: Why are no ServiceSpecs found?
 
-A: 可能的原因：
+A: Possible reasons:
 
-1. **文件路径错误**: 确保 `--path` 指向正确的源代码目录
-2. **注解格式错误**: 检查 ServiceSpec 注解的语法
-3. **文件类型不支持**: 确保文件扩展名为 `.java`、`.ts` 或 `.go`
+1.  **Incorrect file path**: Ensure `--path` points to the correct source code directory.
+2.  **Incorrect annotation format**: Check the syntax of your ServiceSpec annotations.
+3.  **Unsupported file type**: Ensure file extensions are `.java`, `.ts`, or `.go`.
 
 ```bash
-# 使用详细输出查看解析过程
+# Use verbose output to see the parsing process
 flowspec-cli align --path=./src --trace=./trace.json --verbose
 ```
 
-### Q: 如何处理大型项目？
+### Q: How to handle large projects?
 
-A: 对于大型项目，建议：
+A: For large projects, we recommend:
 
-1. **分批处理**: 将项目分成多个子目录分别验证
-2. **并行处理**: FlowSpec CLI 自动使用多核并行处理
-3. **内存监控**: 使用 `--verbose` 查看内存使用情况
+1.  **Batch processing**: Divide the project into subdirectories and validate them separately.
+2.  **Parallel processing**: The FlowSpec CLI automatically uses multiple cores for parallel processing.
+3.  **Memory monitoring**: Use `--verbose` to check memory usage.
 
 ```bash
-# 分批处理示例
+# Batch processing example
 flowspec-cli align --path=./src/user-service --trace=./traces/user-service.json
 flowspec-cli align --path=./src/order-service --trace=./traces/order-service.json
 ```
 
-### Q: 退出码的含义是什么？
+### Q: What do the exit codes mean?
 
-A: FlowSpec CLI 使用以下退出码：
+A: The FlowSpec CLI uses the following exit codes:
 
-- `0`: 验证成功，所有断言通过
-- `1`: 验证失败，存在断言不通过的情况
-- `2`: 系统错误，如文件不存在、解析错误等
+- `0`: Validation successful, all assertions passed.
+- `1`: Validation failed, some assertions did not pass.
+- `2`: System error, such as file not found, parsing error, etc.
 
 ```bash
-# 在脚本中检查退出码
+# Check the exit code in a script
 flowspec-cli align --path=./src --trace=./trace.json
 if [ $? -eq 0 ]; then
-    echo "验证成功"
+    echo "Validation successful"
 elif [ $? -eq 1 ]; then
-    echo "验证失败"
+    echo "Validation failed"
 else
-    echo "系统错误"
+    echo "System error"
 fi
 ```
 
-## ServiceSpec 注解
+## ServiceSpec Annotations
 
-### Q: ServiceSpec 注解的基本格式是什么？
+### Q: What is the basic format of a ServiceSpec annotation?
 
-A: 基本格式如下：
+A: The basic format is as follows:
 
 ```java
 /**
  * @ServiceSpec
  * operationId: "uniqueOperationId"
- * description: "操作描述"
+ * description: "Operation description"
  * preconditions: {
  *   "condition_name": JSONLogic_Expression
  * }
@@ -128,9 +128,9 @@ A: 基本格式如下：
  */
 ```
 
-### Q: 如何编写复杂的断言表达式？
+### Q: How do I write complex assertion expressions?
 
-A: 使用 JSONLogic 语法编写复杂表达式：
+A: Use JSONLogic syntax to write complex expressions:
 
 ```json
 {
@@ -138,8 +138,8 @@ A: 使用 JSONLogic 语法编写复杂表达式：
     "request_validation": {
       "and": [
         {"!=": [{"var": "span.attributes.http.method"}, null]},
-        {"in": [{"var": "span.attributes.http.method"}, ["POST", "PUT"]]},
-        {">=": [{"var": "span.attributes.request.body.password.length"}, 8]}
+        {"in": [{"var": "span.attributes.http.method"}, ["POST", "PUT"]}},
+        {=": [{"var": "span.attributes.request.body.password.length"}, 8]}
       ]
     }
   },
@@ -154,25 +154,25 @@ A: 使用 JSONLogic 语法编写复杂表达式：
 }
 ```
 
-### Q: 可以在断言中访问哪些变量？
+### Q: Which variables can be accessed in assertions?
 
-A: 在断言表达式中可以访问：
+A: You can access the following in assertion expressions:
 
-**前置条件中**:
-- `span.attributes.*`: Span 属性
-- `span.startTime`: 开始时间
-- `span.name`: Span 名称
+**In preconditions**:
+- `span.attributes.*`: Span attributes
+- `span.startTime`: Start time
+- `span.name`: Span name
 
-**后置条件中**:
-- 前置条件的所有变量
-- `endTime`: 结束时间
-- `status.code`: 状态码
-- `status.message`: 状态消息
-- `events[*].*`: 事件数组
+**In postconditions**:
+- All variables from preconditions
+- `endTime`: End time
+- `status.code`: Status code
+- `status.message`: Status message
+- `events[*].*`: Array of events
 
-### Q: 如何处理可选字段？
+### Q: How to handle optional fields?
 
-A: 使用条件判断处理可选字段：
+A: Use conditional logic to handle optional fields:
 
 ```json
 {
@@ -180,7 +180,7 @@ A: 使用条件判断处理可选字段：
     "optional_field_check": {
       "if": [
         {"!=": [{"var": "span.attributes.response.body.optionalField"}, null]},
-        {">=": [{"var": "span.attributes.response.body.optionalField"}, 0]},
+        {=": [{"var": "span.attributes.response.body.optionalField"}, 0]},
         true
       ]
     }
@@ -188,154 +188,154 @@ A: 使用条件判断处理可选字段：
 }
 ```
 
-## 轨迹数据
+## Trace Data
 
-### Q: 支持哪些轨迹数据格式？
+### Q: Which trace data formats are supported?
 
-A: 目前支持 OpenTelemetry JSON 格式的轨迹数据。
+A: Currently, we support the OpenTelemetry JSON format.
 
-### Q: 如何生成 OpenTelemetry 轨迹数据？
+### Q: How do I generate OpenTelemetry trace data?
 
-A: 可以使用各种 OpenTelemetry SDK：
+A: You can use various OpenTelemetry SDKs:
 
 ```java
-// Java 示例
+// Java Example
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 
 Tracer tracer = OpenTelemetry.getGlobalTracer("my-service");
 Span span = tracer.spanBuilder("createUser").startSpan();
-// ... 业务逻辑
+// ... business logic
 span.end();
 ```
 
-### Q: 轨迹文件太大怎么办？
+### Q: What if the trace file is too large?
 
-A: FlowSpec CLI 支持大文件处理：
+A: The FlowSpec CLI supports large file handling:
 
-1. **流式处理**: 自动使用流式解析，避免内存溢出
-2. **内存限制**: 默认限制峰值内存使用 500MB
-3. **分片处理**: 可以将大轨迹文件分割成多个小文件
+1.  **Stream processing**: Automatically uses stream parsing to avoid memory overflow.
+2.  **Memory limit**: Default peak memory usage is limited to 500MB.
+3.  **Sharding**: You can split large trace files into smaller ones.
 
 ```bash
-# 监控内存使用
+# Monitor memory usage
 flowspec-cli align --path=./src --trace=./large-trace.json --verbose
 ```
 
-### Q: 如何匹配 ServiceSpec 和 Span？
+### Q: How are ServiceSpecs and Spans matched?
 
-A: 匹配基于 `operationId`：
+A: Matching is based on `operationId`:
 
-1. ServiceSpec 中的 `operationId` 字段
-2. Span 中的 `name` 属性或 `operation.name` 属性
-3. 支持模糊匹配和正则表达式匹配
+1.  The `operationId` field in the ServiceSpec.
+2.  The `name` or `operation.name` attribute in the Span.
+3.  Fuzzy matching and regular expression matching are supported.
 
-## 性能和优化
+## Performance and Optimization
 
-### Q: 如何提高解析性能？
+### Q: How to improve parsing performance?
 
-A: 性能优化建议：
+A: Performance optimization suggestions:
 
-1. **并行处理**: FlowSpec CLI 自动使用多核并行处理
-2. **文件过滤**: 只扫描包含 ServiceSpec 的目录
-3. **缓存机制**: 启用解析结果缓存
+1.  **Parallel processing**: The FlowSpec CLI automatically uses multiple cores.
+2.  **File filtering**: Only scan directories containing ServiceSpecs.
+3.  **Caching mechanism**: Enable parsing result caching.
 
 ```bash
-# 使用性能监控
+# Use performance monitoring
 flowspec-cli align --path=./src --trace=./trace.json --verbose
 ```
 
-### Q: 内存使用过高怎么办？
+### Q: What if memory usage is too high?
 
-A: 内存优化策略：
+A: Memory optimization strategies:
 
-1. **分批处理**: 将大项目分成小批次处理
-2. **调整限制**: 根据系统配置调整内存限制
-3. **清理缓存**: 定期清理解析缓存
+1.  **Batch processing**: Process large projects in smaller batches.
+2.  **Adjust limits**: Adjust memory limits based on system configuration.
+3.  **Clear cache**: Periodically clear the parsing cache.
 
-### Q: 如何进行性能基准测试？
+### Q: How to perform performance benchmark tests?
 
-A: 使用内置的性能测试：
+A: Use the built-in performance tests:
 
 ```bash
-# 运行性能测试
+# Run performance tests
 make performance-test
 
-# 运行基准测试
+# Run benchmark tests
 make benchmark
 
-# 运行压力测试
+# Run stress tests
 make stress-test
 ```
 
-## 故障排除
+## Troubleshooting
 
-### Q: 解析错误如何调试？
+### Q: How to debug parsing errors?
 
-A: 调试步骤：
+A: Debugging steps:
 
-1. **启用详细输出**: 使用 `--verbose` 参数
-2. **检查日志**: 查看详细的错误信息
-3. **验证语法**: 确保 ServiceSpec 注解语法正确
+1.  **Enable verbose output**: Use the `--verbose` parameter.
+2.  **Check logs**: View detailed error messages.
+3.  **Validate syntax**: Ensure the ServiceSpec annotation syntax is correct.
 
 ```bash
-# 调试模式
+# Debug mode
 flowspec-cli align --path=./src --trace=./trace.json --verbose --log-level=debug
 ```
 
-### Q: JSONLogic 表达式错误怎么办？
+### Q: What to do about JSONLogic expression errors?
 
-A: 常见问题和解决方案：
+A: Common issues and solutions:
 
-1. **语法错误**: 检查 JSON 格式是否正确
-2. **变量引用错误**: 确保变量路径正确
-3. **类型不匹配**: 检查数据类型是否匹配
+1.  **Syntax error**: Check if the JSON format is correct.
+2.  **Variable reference error**: Ensure the variable path is correct.
+3.  **Type mismatch**: Check if the data types match.
 
 ```bash
-# 使用在线 JSONLogic 测试工具验证表达式
+# Use an online JSONLogic testing tool to validate expressions
 # https://jsonlogic.com/play.html
 ```
 
-### Q: 轨迹数据解析失败怎么办？
+### Q: What if trace data parsing fails?
 
-A: 检查步骤：
+A: Check the following:
 
-1. **文件格式**: 确保是有效的 JSON 格式
-2. **数据结构**: 检查是否符合 OpenTelemetry 规范
-3. **文件权限**: 确保有读取文件的权限
+1.  **File format**: Ensure it is a valid JSON format.
+2.  **Data structure**: Check if it conforms to the OpenTelemetry specification.
+3.  **File permissions**: Ensure you have read permissions for the file.
 
 ```bash
-# 验证 JSON 格式
-cat trace.json | jq . > /dev/null && echo "JSON 格式正确" || echo "JSON 格式错误"
+# Validate JSON format
+cat trace.json | jq . > /dev/null && echo "JSON format is correct" || echo "JSON format is incorrect"
 ```
 
-### Q: 如何报告 Bug？
+### Q: How to report a bug?
 
-A: 报告 Bug 时请提供：
+A: When reporting a bug, please provide:
 
-1. **版本信息**: `flowspec-cli --version`
-2. **命令行参数**: 完整的命令行调用
-3. **错误信息**: 完整的错误输出
-4. **环境信息**: 操作系统、Go 版本等
-5. **重现步骤**: 详细的重现步骤
+1.  **Version information**: `flowspec-cli --version`
+2.  **Command-line arguments**: The full command-line invocation.
+3.  **Error message**: The complete error output.
+4.  **Environment information**: OS, Go version, etc.
+5.  **Steps to reproduce**: Detailed steps to reproduce the issue.
 
 ```bash
-# 收集环境信息
+# Collect environment information
 flowspec-cli --version
 go version
 uname -a
 ```
 
-## 更多帮助
+## More Help
 
-如果这里没有找到您问题的答案，请：
+If you can't find the answer to your question here, please:
 
-1. 查看 [API 文档](API.md)
-2. 查看 [架构文档](ARCHITECTURE.md)
-3. 在 [GitHub Issues](../../issues) 中搜索
-4. 在 [GitHub Discussions](../../discussions) 中提问
-5. 发送邮件到 flowspec@example.com
+1.  Check the [API Documentation](API.md)
+2.  Check the [Architecture Document](ARCHITECTURE.md)
+3.  Search in [GitHub Issues](../../issues)
+4.  Ask in [GitHub Discussions](../../discussions)
+5.  Email us at youming@flowspec.org
 
 ---
 
-**提示**: 这个 FAQ 会持续更新，如果您有新的问题或建议，欢迎提交 Issue 或 Pull Request。
+**Tip**: This FAQ is continuously updated. If you have new questions or suggestions, feel free to submit an Issue or Pull Request.

@@ -1,66 +1,66 @@
-# FlowSpec CLI 架构文档
+# FlowSpec CLI Architecture Document
 
-本文档详细描述了 FlowSpec CLI 的技术架构、设计决策和实现细节。
+This document details the technical architecture, design decisions, and implementation details of the FlowSpec CLI.
 
-## 目录
+## Table of Contents
 
-- [架构概览](#架构概览)
-- [模块设计](#模块设计)
-- [数据流](#数据流)
-- [设计决策](#设计决策)
-- [性能优化](#性能优化)
-- [扩展性](#扩展性)
+- [Architecture Overview](#architecture-overview)
+- [Module Design](#module-design)
+- [Data Flow](#data-flow)
+- [Design Decisions](#design-decisions)
+- [Performance Optimization](#performance-optimization)
+- [Scalability](#scalability)
 
-## 架构概览
+## Architecture Overview
 
-FlowSpec CLI 采用模块化的分层架构，遵循单一职责原则和依赖倒置原则。
+The FlowSpec CLI uses a modular, layered architecture, following the Single Responsibility Principle and the Dependency Inversion Principle.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        CLI 入口层                                │
-│  • 命令行参数解析                                                │
-│  • 流程编排                                                      │
-│  • 错误处理和用户反馈                                            │
+│                        CLI Entry Layer                          │
+│  • Command-line argument parsing                                │
+│  • Flow orchestration                                            │
+│  • Error handling and user feedback                              │
 └─────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   SpecParser    │    │ TraceIngestor   │    │AlignmentEngine  │
 │                 │    │                 │    │                 │
-│ • 多语言解析     │    │ • OTel 解析     │    │ • JSONLogic     │
-│ • 注解提取       │    │ • 轨迹组织       │    │ • 断言评估       │
-│ • 容错处理       │    │ • 内存优化       │    │ • 报告生成       │
+│ • Multi-language │    │ • OTel Parsing  │    │ • JSONLogic     │
+│ • Annotation Ext.│    │ • Trace Org.    │    │ • Assertion Eval.│
+│ • Fault Tolerance│    │ • Memory Opt.   │    │ • Report Gen.   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                     │
                                     ▼
                         ┌─────────────────┐
                         │ ReportRenderer  │
                         │                 │
-                        │ • Human 格式    │
-                        │ • JSON 格式     │
-                        │ • 退出码管理     │
+                        │ • Human Format  │
+                        │ • JSON Format   │
+                        │ • Exit Code Mgmt│
                         └─────────────────┘
 ```
 
-### 核心设计原则
+### Core Design Principles
 
-1. **模块化**: 每个模块都有明确的职责边界
-2. **可测试性**: 通过接口抽象实现依赖注入
-3. **可扩展性**: 支持新语言解析器和输出格式的插件化扩展
-4. **性能优化**: 流式处理、并发安全、内存控制
-5. **容错性**: 优雅的错误处理和恢复机制
+1.  **Modularity**: Each module has a clear boundary of responsibility.
+2.  **Testability**: Dependency injection is achieved through interface abstraction.
+3.  **Scalability**: Supports plug-in extensions for new language parsers and output formats.
+4.  **Performance Optimization**: Stream processing, concurrency safety, memory control.
+5.  **Fault Tolerance**: Graceful error handling and recovery mechanisms.
 
-## 模块设计
+## Module Design
 
-### 1. CLI 入口层 (cmd/flowspec-cli)
+### 1. CLI Entry Layer (cmd/flowspec-cli)
 
-#### 职责
-- 命令行参数解析和验证
-- 按照 FlowSpec 规约编排各模块调用
-- 全局错误处理和用户反馈
-- 日志配置和输出管理
+#### Responsibilities
+- Parsing and validating command-line arguments.
+- Orchestrating module calls according to the FlowSpec specification.
+- Global error handling and user feedback.
+- Log configuration and output management.
 
-#### 关键组件
+#### Key Components
 
 ```go
 type CLI struct {
@@ -81,56 +81,56 @@ type CLIConfig struct {
 }
 ```
 
-#### 流程编排
+#### Flow Orchestration
 
-CLI 严格按照 `phase1_mvp.flowspec.yaml` 中定义的流程执行：
+The CLI strictly follows the flow defined in `phase1_mvp.flowspec.yaml`:
 
-1. **参数验证阶段**: 验证输入参数的有效性
-2. **解析阶段**: 调用 SpecParser 解析源代码
-3. **摄取阶段**: 调用 TraceIngestor 处理轨迹数据
-4. **对齐阶段**: 调用 AlignmentEngine 执行验证
-5. **渲染阶段**: 调用 ReportRenderer 生成报告
+1.  **Parameter Validation Phase**: Validates the input parameters.
+2.  **Parsing Phase**: Calls the SpecParser to parse the source code.
+3.  **Ingestion Phase**: Calls the TraceIngestor to process trace data.
+4.  **Alignment Phase**: Calls the AlignmentEngine to perform validation.
+5.  **Rendering Phase**: Calls the ReportRenderer to generate the report.
 
-### 2. SpecParser 模块 (internal/parser)
+### 2. SpecParser Module (internal/parser)
 
-#### 架构设计
+#### Architectural Design
 
 ```go
-// 主解析器
+// Main parser
 type SpecParser struct {
     fileParsers []FileParser
     logger      *logrus.Logger
 }
 
-// 文件解析器接口
+// File parser interface
 type FileParser interface {
     CanParse(filename string) bool
     ParseFile(filepath string) ([]ServiceSpec, []ParseError)
 }
 
-// 具体实现
+// Concrete implementations
 type JavaParser struct { /* ... */ }
 type TypeScriptParser struct { /* ... */ }
 type GoParser struct { /* ... */ }
 ```
 
-#### 多语言支持策略
+#### Multi-language Support Strategy
 
-**插件化设计**: 每种语言都有独立的解析器实现，通过 `FileParser` 接口统一管理。
+**Plugin-based Design**: Each language has an independent parser implementation, managed uniformly through the `FileParser` interface.
 
-**容错处理**: 
-- 单个文件解析失败不影响整体流程
-- 收集所有错误信息，最后统一报告
-- 提供详细的错误上下文（文件路径、行号、错误原因）
+**Fault Tolerance**:
+- Failure to parse a single file does not affect the overall process.
+- All errors are collected and reported together at the end.
+- Detailed error context (file path, line number, reason) is provided.
 
-**性能优化**:
-- 并行文件扫描和解析
-- 智能文件过滤（根据扩展名预筛选）
-- 解析结果缓存机制
+**Performance Optimization**:
+- Parallel file scanning and parsing.
+- Smart file filtering (pre-filtering based on extension).
+- Caching mechanism for parsing results.
 
-#### 注解格式统一
+#### Unified Annotation Format
 
-所有语言的 ServiceSpec 注解都遵循相同的结构：
+ServiceSpec annotations for all languages follow the same structure:
 
 ```yaml
 operationId: "string"
@@ -139,9 +139,9 @@ preconditions: JSONLogic_Object
 postconditions: JSONLogic_Object
 ```
 
-### 3. TraceIngestor 模块 (internal/ingestor)
+### 3. TraceIngestor Module (internal/ingestor)
 
-#### 架构设计
+#### Architectural Design
 
 ```go
 type TraceIngestor struct {
@@ -157,24 +157,24 @@ type TraceStore struct {
 }
 ```
 
-#### 内存优化策略
+#### Memory Optimization Strategy
 
-**流式解析**:
-- 使用 `json.Decoder` 进行流式 JSON 解析
-- 避免一次性加载整个文件到内存
-- 分块处理大文件，及时释放内存
+**Stream Parsing**:
+- Uses `json.Decoder` for streaming JSON parsing.
+- Avoids loading the entire file into memory at once.
+- Processes large files in chunks, releasing memory promptly.
 
-**索引优化**:
-- 构建多维度索引加速查询
-- 使用内存池复用对象
-- 实现 LRU 缓存机制
+**Index Optimization**:
+- Builds multi-dimensional indexes to speed up queries.
+- Uses a memory pool to reuse objects.
+- Implements an LRU cache mechanism.
 
-**内存监控**:
-- 实时监控内存使用情况
-- 设置内存使用上限（默认 500MB）
-- 提供内存压力下的优雅降级
+**Memory Monitoring**:
+- Monitors memory usage in real-time.
+- Sets a memory usage limit (default 500MB).
+- Provides graceful degradation under memory pressure.
 
-#### 数据组织
+#### Data Organization
 
 ```go
 type TraceData struct {
@@ -190,14 +190,14 @@ type SpanNode struct {
 }
 ```
 
-**树形结构构建**:
-- 根据 `parentSpanId` 构建 Span 树
-- 支持多根节点的森林结构
-- 提供深度优先和广度优先遍历
+**Tree Structure Construction**:
+- Builds a span tree based on `parentSpanId`.
+- Supports a forest structure with multiple root nodes.
+- Provides depth-first and breadth-first traversal.
 
-### 4. AlignmentEngine 模块 (internal/engine)
+### 4. AlignmentEngine Module (internal/engine)
 
-#### 架构设计
+#### Architectural Design
 
 ```go
 type AlignmentEngine struct {
@@ -212,14 +212,14 @@ type JSONLogicEvaluator struct {
 }
 ```
 
-#### JSONLogic 集成
+#### JSONLogic Integration
 
-**表达式沙盒**:
-- 限制表达式执行时间
-- 防止无限循环和递归
-- 内存使用限制
+**Expression Sandbox**:
+- Limits expression execution time.
+- Prevents infinite loops and recursion.
+- Restricts memory usage.
 
-**上下文构建**:
+**Context Construction**:
 ```go
 type EvaluationContext struct {
     Span struct {
@@ -227,22 +227,22 @@ type EvaluationContext struct {
         StartTime  time.Time
         Name       string
     }
-    EndTime time.Time    // 仅在后置条件中可用
-    Status  SpanStatus   // 仅在后置条件中可用
-    Events  []SpanEvent  // 仅在后置条件中可用
+    EndTime time.Time    // Available only in postconditions
+    Status  SpanStatus   // Available only in postconditions
+    Events  []SpanEvent  // Available only in postconditions
 }
 ```
 
-#### 验证流程
+#### Validation Flow
 
-1. **Spec 匹配**: 根据 `operationId` 匹配 ServiceSpec 和 Span
-2. **前置条件评估**: 使用 Span 开始时的上下文
-3. **后置条件评估**: 使用 Span 完成时的完整上下文
-4. **结果聚合**: 收集所有验证详情，生成最终报告
+1.  **Spec Matching**: Matches ServiceSpec and Span based on `operationId`.
+2.  **Precondition Evaluation**: Uses the context at the start of the span.
+3.  **Postcondition Evaluation**: Uses the full context at the completion of the span.
+4.  **Result Aggregation**: Collects all validation details to generate the final report.
 
-### 5. ReportRenderer 模块 (internal/renderer)
+### 5. ReportRenderer Module (internal/renderer)
 
-#### 架构设计
+#### Architectural Design
 
 ```go
 type ReportRenderer struct {
@@ -257,39 +257,39 @@ type HumanRenderer struct {
 }
 ```
 
-#### 输出格式
+#### Output Formats
 
-**Human 格式**:
-- 彩色终端输出
-- 层次化信息展示
-- 进度指示和统计汇总
+**Human Format**:
+- Colorized terminal output.
+- Hierarchical information display.
+- Progress indication and statistical summary.
 
-**JSON 格式**:
-- 结构化数据输出
-- 便于程序化处理
-- 符合 JSON Schema 规范
+**JSON Format**:
+- Structured data output.
+- Easy for programmatic processing.
+- Complies with JSON Schema specification.
 
-#### 退出码管理
+#### Exit Code Management
 
 ```go
 const (
-    ExitSuccess      = 0  // 验证成功
-    ExitValidationFailed = 1  // 验证失败
-    ExitSystemError  = 2  // 系统错误
+    ExitSuccess      = 0  // Validation successful
+    ExitValidationFailed = 1  // Validation failed
+    ExitSystemError  = 2  // System error
 )
 ```
 
-## 数据流
+## Data Flow
 
-### 完整数据流程
+### Complete Data Flow
 
 ```mermaid
 graph TD
-    A[CLI 参数] --> B[参数验证]
+    A[CLI Arguments] --> B[Parameter Validation]
     B --> C[SpecParser]
     C --> D[ServiceSpec[]]
     
-    E[轨迹文件] --> F[TraceIngestor]
+    E[Trace File] --> F[TraceIngestor]
     F --> G[TraceStore]
     
     D --> H[AlignmentEngine]
@@ -297,59 +297,59 @@ graph TD
     H --> I[AlignmentReport]
     
     I --> J[ReportRenderer]
-    J --> K[终端输出]
-    J --> L[退出码]
+    J --> K[Terminal Output]
+    J --> L[Exit Code]
 ```
 
-### 错误传播
+### Error Propagation
 
 ```mermaid
 graph TD
-    A[模块错误] --> B{错误类型}
-    B -->|解析错误| C[收集错误继续处理]
-    B -->|系统错误| D[立即终止]
-    B -->|验证失败| E[记录失败继续处理]
+    A[Module Error] --> B{Error Type}
+    B -->|Parse Error| C[Collect error and continue]
+    B -->|System Error| D[Terminate immediately]
+    B -->|Validation Failure| E[Record failure and continue]
     
-    C --> F[最终错误报告]
+    C --> F[Final Error Report]
     E --> F
-    D --> G[错误退出]
-    F --> H[正常退出带错误信息]
+    D --> G[Error Exit]
+    F --> H[Normal exit with error info]
 ```
 
-## 设计决策
+## Design Decisions
 
-### 1. 为什么选择 Go 语言？
+### 1. Why choose the Go language?
 
-- **性能**: 编译型语言，执行效率高
-- **并发**: 原生 goroutine 支持，适合并行处理
-- **部署**: 单一二进制文件，部署简单
-- **生态**: 丰富的 CLI 和 JSON 处理库
+- **Performance**: Compiled language, high execution efficiency.
+- **Concurrency**: Native goroutine support, suitable for parallel processing.
+- **Deployment**: Single binary file, simple deployment.
+- **Ecosystem**: Rich libraries for CLI and JSON processing.
 
-### 2. 为什么使用 JSONLogic？
+### 2. Why use JSONLogic?
 
-- **表达能力**: 支持复杂的逻辑表达式
-- **安全性**: 沙盒执行，避免代码注入
-- **可读性**: JSON 格式，易于理解和调试
-- **扩展性**: 支持自定义操作符
+- **Expressiveness**: Supports complex logical expressions.
+- **Security**: Sandboxed execution, prevents code injection.
+- **Readability**: JSON format, easy to understand and debug.
+- **Extensibility**: Supports custom operators.
 
-### 3. 为什么采用接口抽象？
+### 3. Why use interface abstraction?
 
-- **可测试性**: 便于 Mock 和单元测试
-- **可扩展性**: 支持插件化扩展
-- **解耦**: 降低模块间的依赖关系
-- **维护性**: 便于独立开发和维护
+- **Testability**: Facilitates mocking and unit testing.
+- **Extensibility**: Supports plugin-based extensions.
+- **Decoupling**: Reduces dependencies between modules.
+- **Maintainability**: Facilitates independent development and maintenance.
 
-### 4. 为什么选择流式处理？
+### 4. Why choose stream processing?
 
-- **内存效率**: 避免大文件一次性加载
-- **实时性**: 支持实时数据处理
-- **可扩展性**: 支持更大规模的数据处理
+- **Memory Efficiency**: Avoids loading large files into memory at once.
+- **Real-time Capability**: Supports real-time data processing.
+- **Scalability**: Supports larger-scale data processing.
 
-## 性能优化
+## Performance Optimization
 
-### 1. 解析性能优化
+### 1. Parsing Performance Optimization
 
-**并行处理**:
+**Parallel Processing**:
 ```go
 func (p *SpecParser) parseFiles(files []string) {
     semaphore := make(chan struct{}, runtime.NumCPU())
@@ -370,14 +370,14 @@ func (p *SpecParser) parseFiles(files []string) {
 }
 ```
 
-**智能缓存**:
-- 文件修改时间检查
-- 解析结果缓存
-- 增量更新机制
+**Smart Caching**:
+- File modification time check.
+- Caching of parsing results.
+- Incremental update mechanism.
 
-### 2. 内存优化
+### 2. Memory Optimization
 
-**对象池**:
+**Object Pool**:
 ```go
 var spanPool = sync.Pool{
     New: func() interface{} {
@@ -395,7 +395,7 @@ func putSpan(s *Span) {
 }
 ```
 
-**内存监控**:
+**Memory Monitoring**:
 ```go
 type MemoryMonitor struct {
     maxMemory uint64
@@ -414,9 +414,9 @@ func (m *MemoryMonitor) CheckMemoryLimit() error {
 }
 ```
 
-### 3. 查询优化
+### 3. Query Optimization
 
-**多维索引**:
+**Multi-dimensional Indexing**:
 ```go
 type SpanIndexer struct {
     byOperationId map[string][]*Span
@@ -425,16 +425,16 @@ type SpanIndexer struct {
 }
 ```
 
-**查询缓存**:
-- LRU 缓存热点查询
-- 查询结果预计算
-- 索引预热机制
+**Query Caching**:
+- LRU caching for hot queries.
+- Pre-computation of query results.
+- Index pre-warming mechanism.
 
-## 扩展性
+## Scalability
 
-### 1. 新语言支持
+### 1. New Language Support
 
-添加新语言解析器只需实现 `FileParser` 接口：
+To add a new language parser, simply implement the `FileParser` interface:
 
 ```go
 type PythonParser struct{}
@@ -444,41 +444,41 @@ func (p *PythonParser) CanParse(filename string) bool {
 }
 
 func (p *PythonParser) ParseFile(filepath string) ([]ServiceSpec, []ParseError) {
-    // Python 特定的解析逻辑
+    // Python-specific parsing logic
     return specs, errors
 }
 
-// 注册解析器
+// Register the parser
 specParser.RegisterFileParser(&PythonParser{})
 ```
 
-### 2. 新输出格式
+### 2. New Output Format
 
-添加新输出格式只需扩展 `ReportRenderer`：
+To add a new output format, extend the `ReportRenderer`:
 
 ```go
 func (r *ReportRenderer) RenderXML(report *AlignmentReport) (string, error) {
-    // XML 格式渲染逻辑
+    // XML rendering logic
     return xmlOutput, nil
 }
 ```
 
-### 3. 自定义断言操作符
+### 3. Custom Assertion Operators
 
-扩展 JSONLogic 引擎：
+Extend the JSONLogic engine:
 
 ```go
 func init() {
     jsonlogic.AddOperator("custom_op", func(data interface{}, params ...interface{}) interface{} {
-        // 自定义操作符逻辑
+        // Custom operator logic
         return result
     })
 }
 ```
 
-### 4. 插件系统
+### 4. Plugin System
 
-未来可以考虑实现基于 Go plugin 的插件系统：
+In the future, a plugin system based on Go's `plugin` package could be considered:
 
 ```go
 type Plugin interface {
@@ -494,46 +494,46 @@ type ParserPlugin interface {
 }
 ```
 
-## 安全考虑
+## Security Considerations
 
-### 1. 输入验证
+### 1. Input Validation
 
-- 文件路径遍历防护
-- JSON 解析深度限制
-- 文件大小限制
+- File path traversal protection.
+- JSON parsing depth limit.
+- File size limit.
 
-### 2. 表达式沙盒
+### 2. Expression Sandbox
 
-- 执行时间限制
-- 内存使用限制
-- 禁止危险操作
+- Execution time limit.
+- Memory usage limit.
+- Prohibition of dangerous operations.
 
-### 3. 错误信息安全
+### 3. Error Message Security
 
-- 敏感路径信息脱敏
-- 堆栈跟踪清理
-- 错误信息标准化
+- Sanitization of sensitive path information.
+- Cleaning of stack traces.
+- Standardization of error messages.
 
-## 监控和可观测性
+## Monitoring and Observability
 
-### 1. 性能指标
+### 1. Performance Metrics
 
-- 解析耗时统计
-- 内存使用监控
-- 查询性能分析
+- Parsing time statistics.
+- Memory usage monitoring.
+- Query performance analysis.
 
-### 2. 错误追踪
+### 2. Error Tracking
 
-- 结构化日志输出
-- 错误分类统计
-- 异常堆栈收集
+- Structured log output.
+- Error classification statistics.
+- Exception stack collection.
 
-### 3. 运行时指标
+### 3. Runtime Metrics
 
-- 处理文件数量
-- 验证成功率
-- 资源使用情况
+- Number of files processed.
+- Validation success rate.
+- Resource usage.
 
 ---
 
-这个架构设计为 FlowSpec CLI 提供了坚实的技术基础，确保系统的可维护性、可扩展性和高性能。随着项目的发展，架构会持续演进以满足新的需求。
+This architectural design provides a solid technical foundation for the FlowSpec CLI, ensuring the system's maintainability, scalability, and high performance. As the project evolves, the architecture will continue to be refined to meet new requirements.

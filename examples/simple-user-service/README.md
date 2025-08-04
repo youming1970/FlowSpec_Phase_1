@@ -1,16 +1,16 @@
-# 简单用户服务示例
+# Simple User Service Example
 
-这是一个基础的用户管理服务示例，展示了如何使用 FlowSpec CLI 验证简单的 CRUD 操作。
+This is a basic user management service example that demonstrates how to use the FlowSpec CLI to validate simple CRUD operations.
 
-## 项目概述
+## Project Overview
 
-本示例实现了一个简单的用户管理 API，包含以下操作：
-- 创建用户 (`createUser`)
-- 获取用户 (`getUser`)
-- 更新用户 (`updateUser`)
-- 删除用户 (`deleteUser`)
+This example implements a simple user management API with the following operations:
+- Create User (`createUser`)
+- Get User (`getUser`)
+- Update User (`updateUser`)
+- Delete User (`deleteUser`)
 
-## 文件结构
+## File Structure
 
 ```
 simple-user-service/
@@ -29,15 +29,15 @@ simple-user-service/
     └── postcondition-failure-report.json
 ```
 
-## ServiceSpec 注解示例
+## ServiceSpec Annotation Examples
 
-### 创建用户
+### Create User
 
 ```java
 /**
  * @ServiceSpec
  * operationId: "createUser"
- * description: "创建新用户账户"
+ * description: "Create a new user account"
  * preconditions: {
  *   "email_required": {"!=": [{"var": "span.attributes.request.body.email"}, null]},
  *   "email_format": {"match": [{"var": "span.attributes.request.body.email"}, "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$"]},
@@ -50,17 +50,17 @@ simple-user-service/
  * }
  */
 public User createUser(CreateUserRequest request) {
-    // 实现逻辑
+    // Implementation logic
 }
 ```
 
-### 获取用户
+### Get User
 
 ```java
 /**
  * @ServiceSpec
  * operationId: "getUser"
- * description: "根据用户ID获取用户信息"
+ * description: "Get user information by user ID"
  * preconditions: {
  *   "user_id_required": {"!=": [{"var": "span.attributes.request.params.userId"}, null]},
  *   "user_id_format": {"match": [{"var": "span.attributes.request.params.userId"}, "^[0-9]+$"]}
@@ -80,59 +80,59 @@ public User createUser(CreateUserRequest request) {
  * }
  */
 public User getUser(Long userId) {
-    // 实现逻辑
+    // Implementation logic
 }
 ```
 
-## 运行示例
+## Running the Example
 
-### 1. 成功场景验证
+### 1. Success Scenario Validation
 
 ```bash
-# 运行成功场景验证
+# Run success scenario validation
 flowspec-cli align \
   --path=./src \
   --trace=./traces/success-scenario.json \
   --output=human
 
-# 预期输出：
-# ✅ 所有 ServiceSpec 验证通过
-# 📊 汇总: 4 个总计, 4 个成功, 0 个失败, 0 个跳过
+# Expected output:
+# ✅ All ServiceSpec validations passed
+# 📊 Summary: 4 total, 4 success, 0 failed, 0 skipped
 ```
 
-### 2. 前置条件失败场景
+### 2. Precondition Failure Scenario
 
 ```bash
-# 运行前置条件失败场景
+# Run precondition failure scenario
 flowspec-cli align \
   --path=./src \
   --trace=./traces/precondition-failure.json \
   --output=human
 
-# 预期输出：
-# ❌ createUser 验证失败
-# 前置条件 'password_length' 失败: 密码长度不足 8 位
+# Expected output:
+# ❌ createUser validation failed
+# Precondition 'password_length' failed: Password length is less than 8
 ```
 
-### 3. 后置条件失败场景
+### 3. Postcondition Failure Scenario
 
 ```bash
-# 运行后置条件失败场景
+# Run postcondition failure scenario
 flowspec-cli align \
   --path=./src \
   --trace=./traces/postcondition-failure.json \
   --output=human
 
-# 预期输出：
-# ❌ createUser 验证失败
-# 后置条件 'success_status' 失败: 期望状态码 201，实际 500
+# Expected output:
+# ❌ createUser validation failed
+# Postcondition 'success_status' failed: Expected status code 201, but got 500
 ```
 
-## 轨迹数据说明
+## Trace Data Description
 
-### 成功场景轨迹
+### Success Scenario Trace
 
-`traces/success-scenario.json` 包含了所有操作成功执行的轨迹数据：
+`traces/success-scenario.json` contains trace data for the successful execution of all operations:
 
 ```json
 {
@@ -159,85 +159,85 @@ flowspec-cli align \
 }
 ```
 
-### 失败场景轨迹
+### Failure Scenario Traces
 
-失败场景的轨迹数据故意包含了不满足 ServiceSpec 断言的数据，用于测试验证逻辑。
+The trace data for failure scenarios intentionally contains data that does not satisfy the ServiceSpec assertions, used for testing the validation logic.
 
-## 学习要点
+## Learning Points
 
-### 1. 断言表达式编写
+### 1. Writing Assertion Expressions
 
-- **简单比较**: `{"==": [value1, value2]}`
-- **空值检查**: `{"!=": [value, null]}`
-- **正则匹配**: `{"match": [string, pattern]}`
-- **条件判断**: `{"if": [condition, then_value, else_value]}`
+- **Simple Comparison**: `{"==": [value1, value2]}`
+- **Null Check**: `{"!=": [value, null]}`
+- **Regex Match**: `{"match": [string, pattern]}`
+- **Conditional Logic**: `{"if": [condition, then_value, else_value]}`
 
-### 2. 变量路径
+### 2. Variable Paths
 
-- **请求数据**: `span.attributes.request.body.*`
-- **响应数据**: `span.attributes.response.body.*`
-- **HTTP 信息**: `span.attributes.http.*`
-- **时间信息**: `span.startTime`, `endTime`
+- **Request Data**: `span.attributes.request.body.*`
+- **Response Data**: `span.attributes.response.body.*`
+- **HTTP Info**: `span.attributes.http.*`
+- **Time Info**: `span.startTime`, `endTime`
 
-### 3. 最佳实践
+### 3. Best Practices
 
-- 使用有意义的断言名称
-- 编写清晰的错误消息
-- 考虑边界情况和异常处理
-- 保持断言表达式简洁
+- Use meaningful assertion names.
+- Write clear error messages.
+- Consider edge cases and exception handling.
+- Keep assertion expressions concise.
 
-## 扩展练习
+## Extension Exercises
 
-### 1. 添加新的 ServiceSpec
+### 1. Add New ServiceSpecs
 
-尝试为以下操作添加 ServiceSpec 注解：
-- 批量创建用户
-- 用户密码重置
-- 用户状态更新
+Try adding ServiceSpec annotations for the following operations:
+- Bulk user creation
+- User password reset
+- User status update
 
-### 2. 复杂断言表达式
+### 2. Complex Assertion Expressions
 
-练习编写更复杂的断言：
-- 多条件组合验证
-- 数组数据验证
-- 时间范围验证
+Practice writing more complex assertions:
+- Multi-condition combination validation
+- Array data validation
+- Time range validation
 
-### 3. 错误场景测试
+### 3. Error Scenario Testing
 
-创建更多的错误场景轨迹：
-- 网络超时
-- 数据库连接失败
-- 权限验证失败
+Create more error scenario traces:
+- Network timeout
+- Database connection failure
+- Permission validation failure
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **ServiceSpec 未找到**
-   - 检查 Java 文件中的注解格式
-   - 确保注解在方法上方
+1.  **ServiceSpec Not Found**
+    -   Check the annotation format in the Java file.
+    -   Ensure the annotation is above the method.
 
-2. **轨迹匹配失败**
-   - 验证 Span 名称与 `operationId` 是否匹配
-   - 检查轨迹文件格式是否正确
+2.  **Trace Matching Failed**
+    -   Verify that the Span name matches the `operationId`.
+    -   Check if the trace file format is correct.
 
-3. **断言评估错误**
-   - 使用 JSONLogic 在线工具验证表达式
-   - 检查变量路径是否存在
+3.  **Assertion Evaluation Error**
+    -   Use an online JSONLogic tool to validate the expression.
+    -   Check if the variable paths are correct.
 
-### 调试命令
+### Debugging Commands
 
 ```bash
-# 详细输出模式
+# Verbose output mode
 flowspec-cli align --path=./src --trace=./traces/success-scenario.json --verbose
 
-# JSON 输出便于分析
+# JSON output for analysis
 flowspec-cli align --path=./src --trace=./traces/success-scenario.json --output=json | jq .
 
-# 调试日志级别
+# Debug log level
 flowspec-cli align --path=./src --trace=./traces/success-scenario.json --log-level=debug
 ```
 
 ---
 
-这个示例为您提供了 FlowSpec CLI 的基础使用方法。掌握这些概念后，您可以继续学习更复杂的示例项目。
+This example provides you with the basic usage of the FlowSpec CLI. After mastering these concepts, you can proceed to learn from more complex example projects.

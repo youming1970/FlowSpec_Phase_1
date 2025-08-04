@@ -5,92 +5,92 @@
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](#)
 [![Coverage](https://img.shields.io/badge/Coverage-80%25+-brightgreen.svg)](#)
 
-FlowSpec CLI 是一个强大的命令行工具，用于从源代码中解析 ServiceSpec 注解，摄取 OpenTelemetry 轨迹数据，并执行规约与实际执行轨迹之间的对齐验证。它帮助开发者在开发周期早期发现服务集成问题，确保微服务架构的可靠性。
+FlowSpec CLI is a powerful command-line tool for parsing ServiceSpec annotations from source code, ingesting OpenTelemetry traces, and performing alignment validation between specifications and actual execution traces. It helps developers discover service integration issues early in the development cycle, ensuring the reliability of microservice architectures.
 
-## 项目状态
+## Project Status
 
-🚧 **开发中** - 这是 FlowSpec Phase 1 MVP 的实现，目前正在积极开发中。
+🚧 **In Development** - This is the implementation of FlowSpec Phase 1 MVP and is currently under active development.
 
-## 核心价值
+## Core Value
 
-- 🔍 **早期发现问题**: 在开发阶段就能发现服务集成问题
-- 📝 **代码即文档**: ServiceSpec 注解直接嵌入源代码，保持同步
-- 🌐 **多语言支持**: 支持 Java、TypeScript、Go 等主流语言
-- 🚀 **CI/CD 集成**: 轻松集成到持续集成流程中
-- 📊 **详细报告**: 提供人类可读和机器可读的验证报告
+- 🔍 **Early Problem Detection**: Discover service integration issues during the development phase.
+- 📝 **Code as Documentation**: ServiceSpec annotations are embedded directly in the source code, keeping them in sync.
+- 🌐 **Multi-Language Support**: Supports mainstream languages like Java, TypeScript, and Go.
+- 🚀 **CI/CD Integration**: Easily integrates into continuous integration workflows.
+- 📊 **Detailed Reports**: Provides human-readable and machine-readable validation reports.
 
-## 功能特性
+## Features
 
-- 📝 从多语言源代码中解析 ServiceSpec 注解 (Java, TypeScript, Go)
-- 📊 摄取和处理 OpenTelemetry 轨迹数据
-- ✅ 执行规约与实际轨迹的对齐验证
-- 📋 生成详细的验证报告 (Human 和 JSON 格式)
-- 🔧 支持命令行界面，易于集成到 CI/CD 流程
+- 📝 Parse ServiceSpec annotations from multi-language source code (Java, TypeScript, Go).
+- 📊 Ingest and process OpenTelemetry trace data.
+- ✅ Perform alignment validation between specifications and actual traces.
+- 📋 Generate detailed validation reports (Human and JSON formats).
+- 🔧 Supports a command-line interface for easy integration into CI/CD pipelines.
 
-## 快速开始
+## Quick Start
 
-### 安装
+### Installation
 
-#### 使用 go install（推荐）
+#### Using go install (Recommended)
 
 ```bash
-go install github.com/your-org/flowspec-cli/cmd/flowspec-cli@latest
+go install github.com/FlowSpec/flowspec-cli/cmd/flowspec-cli@latest
 ```
 
-#### 从源码构建
+#### Build from Source
 
 ```bash
-# 克隆仓库
-git clone https://github.com/your-org/flowspec-cli.git
+# Clone the repository
+git clone https://github.com/FlowSpec/flowspec-cli.git
 cd flowspec-cli
 
-# 安装依赖
+# Install dependencies
 make deps
 
-# 构建
+# Build
 make build
 
-# 安装到 GOPATH
+# Install to GOPATH
 make install
 ```
 
-#### 下载预编译二进制文件
+#### Download Pre-compiled Binaries
 
-访问 [Releases](https://github.com/your-org/flowspec-cli/releases) 页面下载适合您平台的预编译二进制文件。
+Visit the [Releases](https://github.com/FlowSpec/flowspec-cli/releases) page to download pre-compiled binaries for your platform.
 
-### 验证安装
+### Verify Installation
 
 ```bash
 flowspec-cli --version
 flowspec-cli --help
 ```
 
-## 使用方法
+## Usage
 
-### 基本用法
+### Basic Usage
 
 ```bash
-# 执行对齐验证
+# Perform alignment validation
 flowspec-cli align --path=./my-project --trace=./traces/run-1.json --output=human
 
-# JSON 格式输出
+# JSON format output
 flowspec-cli align --path=./my-project --trace=./traces/run-1.json --output=json
 
-# 详细输出
+# Verbose output
 flowspec-cli align --path=./my-project --trace=./traces/run-1.json --output=human --verbose
 ```
 
-### 命令选项
+### Command Options
 
-- `--path, -p`: 源代码目录路径 (默认: ".")
-- `--trace, -t`: OpenTelemetry 轨迹文件路径 (必需)
-- `--output, -o`: 输出格式 (human|json, 默认: "human")
-- `--verbose, -v`: 启用详细输出
-- `--log-level`: 设置日志级别 (debug, info, warn, error)
+- `--path, -p`: Source code directory path (default: ".")
+- `--trace, -t`: OpenTelemetry trace file path (required)
+- `--output, -o`: Output format (human|json, default: "human")
+- `--verbose, -v`: Enable verbose output
+- `--log-level`: Set log level (debug, info, warn, error)
 
-## ServiceSpec 注解格式
+## ServiceSpec Annotation Format
 
-FlowSpec 支持在多种编程语言中使用 ServiceSpec 注解：
+FlowSpec supports ServiceSpec annotations in various programming languages:
 
 ### Java
 
@@ -98,7 +98,7 @@ FlowSpec 支持在多种编程语言中使用 ServiceSpec 注解：
 /**
  * @ServiceSpec
  * operationId: "createUser"
- * description: "创建新用户账户"
+ * description: "Create a new user account"
  * preconditions: {
  *   "request.body.email": {"!=": null},
  *   "request.body.password": {">=": 8}
@@ -117,7 +117,7 @@ public User createUser(CreateUserRequest request) { ... }
 /**
  * @ServiceSpec
  * operationId: "createUser"
- * description: "创建新用户账户"
+ * description: "Create a new user account"
  * preconditions: {
  *   "request.body.email": {"!=": null},
  *   "request.body.password": {">=": 8}
@@ -135,7 +135,7 @@ function createUser(request: CreateUserRequest): Promise<User> { ... }
 ```go
 // @ServiceSpec
 // operationId: "createUser"
-// description: "创建新用户账户"
+// description: "Create a new user account"
 // preconditions: {
 //   "request.body.email": {"!=": null},
 //   "request.body.password": {">=": 8}
@@ -147,108 +147,112 @@ function createUser(request: CreateUserRequest): Promise<User> { ... }
 func CreateUser(request CreateUserRequest) (*User, error) { ... }
 ```
 
-## 开发
+## Development
 
-### 前置要求
+### Prerequisites
 
-- Go 1.21 或更高版本
-- Make (可选，用于构建脚本)
+- Go 1.21 or higher
+- Make (optional, for build scripts)
 
-### 构建和测试
+### Build and Test
 
 ```bash
-# 安装依赖
+# Install dependencies
 make deps
 
-# 格式化代码
+# Format code
 make fmt
 
-# 运行代码检查
+# Run code checks
 make vet
 
-# 运行测试
+# Run tests
 make test
 
-# 生成测试覆盖率报告
+# Generate test coverage report
 make coverage
 
-# 构建二进制文件
+# Build binary
 make build
 
-# 清理构建文件
+# Clean build files
 make clean
 ```
 
-### 项目结构
+### Project Structure
 
 ```
 flowspec-cli/
-├── cmd/flowspec-cli/     # CLI 入口点
-├── internal/             # 内部包
-│   ├── parser/          # ServiceSpec 解析器
-│   ├── ingestor/        # OpenTelemetry 轨迹摄取器
-│   ├── engine/          # 对齐验证引擎
-│   └── renderer/        # 报告渲染器
-├── pkg/                 # 公共包
-├── testdata/            # 测试数据
-├── build/               # 构建输出
-└── Makefile            # 构建脚本
+├── cmd/flowspec-cli/     # CLI entry point
+├── internal/             # Internal packages
+│   ├── parser/          # ServiceSpec parser
+│   ├── ingestor/        # OpenTelemetry trace ingestor
+│   ├── engine/          # Alignment validation engine
+│   └── renderer/        # Report renderer
+├── pkg/                 # Public packages
+├── testdata/            # Test data
+├── build/               # Build output
+└── Makefile            # Build scripts
 ```
 
-## 示例项目
+## Example Projects
 
-查看 [examples](examples/) 目录中的示例项目，了解如何在实际项目中使用 FlowSpec CLI。
+Check out the example projects in the [examples](examples/) directory to learn how to use FlowSpec CLI in a real project.
 
-## 文档
+## Documentation
 
-- 📖 [API 文档](docs/API.md) - 详细的 API 接口文档
-- 🏗️ [架构文档](docs/ARCHITECTURE.md) - 技术架构和设计决策
-- 🤝 [贡献指南](CONTRIBUTING.md) - 如何参与项目开发
-- 📋 [变更日志](CHANGELOG.md) - 版本更新记录
+- 📖 [API Documentation](docs/API.md) - Detailed API interface documentation
+- 🏗️ [Architecture Document](docs/ARCHITECTURE.md) - Technical architecture and design decisions
+- 🤝 [Contribution Guide](CONTRIBUTING.md) - How to participate in project development
+- 📋 [Changelog](CHANGELOG.md) - Version update history
 
-## 性能基准
+## Performance Benchmarks
 
-- **解析性能**: 1,000 个源文件，200 个 ServiceSpecs，< 30 秒
-- **内存使用**: 100MB 轨迹文件，峰值内存 < 500MB
-- **测试覆盖率**: 核心模块 > 80%
+- **Parsing Performance**: 1,000 source files, 200 ServiceSpecs, < 30 seconds
+- **Memory Usage**: 100MB trace file, peak memory < 500MB
+- **Test Coverage**: Core modules > 80%
 
-## 路线图
+## Roadmap
 
-- [ ] 支持更多编程语言（Python、C#、Rust）
-- [ ] 实时轨迹流处理
-- [ ] Web UI 界面
-- [ ] 性能分析和优化建议
-- [ ] 集成测试自动化
+- [ ] Support for more programming languages (Python, C#, Rust)
+- [ ] Real-time trace stream processing
+- [ ] Web UI interface
+- [ ] Performance analysis and optimization suggestions
+- [ ] Integration test automation
 
-## 贡献
+## Contribution
 
-我们欢迎各种形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何参与项目开发。
+We welcome contributions of all forms! Please check out [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to get involved.
 
-### 贡献者
+### Contributors
 
-感谢所有为 FlowSpec CLI 做出贡献的开发者！
+Thank you to all the developers who have contributed to the FlowSpec CLI!
 
-## 许可证
+## License
 
-本项目采用 Apache-2.0 许可证。详情请查看 [LICENSE](LICENSE) 文件。
+This project is licensed under the Apache-2.0 License. See the [LICENSE](LICENSE) file for details.
 
-## 支持
+## Support
 
-如果您遇到问题或有疑问，请：
+If you encounter problems or have questions, please:
 
-1. 📚 查看 [文档](docs/) 和 [FAQ](docs/FAQ.md)
-2. 🔍 搜索现有的 [Issues](../../issues)
-3. 💬 参与 [Discussions](../../discussions) 进行讨论
-4. 🐛 创建新的 Issue 描述您的问题
+1. 📚 Check the [Documentation](https://github.com/FlowSpec/flowspec_cli/tree/main/docs) and [FAQ](https://github.com/FlowSpec/flowspec_cli/blob/main/docs/FAQ.md)
+2. 🔍 Search existing [GitHub Issues](https://github.com/FlowSpec/flowspec_cli/issues)
+3. 💬 Participate in [GitHub Discussions](https://github.com/FlowSpec/flowspec_cli/discussions)
+4. 🐛 [Create a new Issue](https://github.com/FlowSpec/flowspec_cli/issues/new/choose) to describe your problem
 
-## 社区
+## Community
 
-- 💬 [GitHub Discussions](../../discussions) - 讨论和问答
-- 🐛 [GitHub Issues](../../issues) - Bug 报告和功能请求
-- 📧 [邮件列表](mailto:flowspec@example.com) - 项目公告
+- 💬 [GitHub Discussions](https://github.com/FlowSpec/flowspec_cli/discussions) - Discussions and Q&A
+- 🐛 [GitHub Issues](https://github.com/FlowSpec/flowspec_cli/issues) - Bug reports and feature requests
+- 📧 [Mailing List](mailto:youming@flowspec.org) - Project announcements
+- 💬 [Discord Community](https://discord.gg/8zD56fYN) - Real-time communication
 
 ---
 
-**注意**: 这是一个正在开发中的项目，API 和功能可能会发生变化。我们会在主要版本发布前保持向后兼容性。
+**Note**: This is a project under active development, and APIs and features may change. We will maintain backward compatibility before major version releases.
 
-⭐ 如果这个项目对您有帮助，请给我们一个 Star！
+⭐ If you find this project helpful, please give us a Star!
+
+---
+**Disclaimer**: This project is supported and maintained by FlowSpec.

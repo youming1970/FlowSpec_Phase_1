@@ -1,271 +1,271 @@
-# FlowSpec CLI Phase 1 MVP 质量保证检查清单
+# FlowSpec CLI Phase 1 MVP Quality Assurance Checklist
 
-本文档提供了 FlowSpec CLI Phase 1 MVP 发布前的完整质量保证检查清单。
+This document provides a complete quality assurance checklist for the FlowSpec CLI Phase 1 MVP before its release.
 
-## 📋 发布前检查清单
+## 📋 Pre-release Checklist
 
-### 🔧 代码质量
+### 🔧 Code Quality
 
-- [ ] 所有代码已格式化 (`make fmt`)
-- [ ] 通过静态分析检查 (`make vet`)
-- [ ] 通过代码检查工具 (`make lint`)
-- [ ] 没有明显的代码异味或技术债务
-- [ ] 代码注释充分且准确
-- [ ] 错误处理完善
+- [ ] All code is formatted (`make fmt`)
+- [ ] Passed static analysis checks (`make vet`)
+- [ ] Passed code linting tools (`make lint`)
+- [ ] No obvious code smells or technical debt
+- [ ] Code comments are sufficient and accurate
+- [ ] Error handling is comprehensive
 
-### 🧪 测试覆盖
+### 🧪 Test Coverage
 
-- [ ] 单元测试覆盖率 >= 80%
-- [ ] 所有核心模块都有单元测试
-- [ ] 集成测试覆盖主要场景
-- [ ] 性能测试通过基准要求
-- [ ] 边界情况和错误处理测试完整
+- [ ] Unit test coverage >= 80%
+- [ ] All core modules have unit tests
+- [ ] Integration tests cover major scenarios
+- [ ] Performance tests pass benchmark requirements
+- [ ] Boundary cases and error handling are fully tested
 
-### 🏗️ 构建和部署
+### 🏗️ Build and Deployment
 
-- [ ] 本地构建成功 (`make build`)
-- [ ] 多平台构建成功 (`make build-all`)
-- [ ] 发布包创建成功 (`make package`)
-- [ ] 版本信息正确显示
-- [ ] 二进制文件可执行且功能正常
+- [ ] Local build successful (`make build`)
+- [ ] Multi-platform build successful (`make build-all`)
+- [ ] Release package creation successful (`make package`)
+- [ ] Version information is displayed correctly
+- [ ] Binary files are executable and functional
 
-### 📖 文档完整性
+### 📖 Documentation Completeness
 
-- [ ] README.md 内容完整且准确
-- [ ] API 文档 (docs/API.md) 完整
-- [ ] 架构文档 (docs/ARCHITECTURE.md) 详细
-- [ ] 贡献指南 (CONTRIBUTING.md) 清晰
-- [ ] 变更日志 (CHANGELOG.md) 更新
-- [ ] FAQ 文档 (docs/FAQ.md) 实用
-- [ ] 示例项目完整且可运行
+- [ ] README.md is complete and accurate
+- [ ] API documentation (docs/API.md) is complete
+- [ ] Architecture documentation (docs/ARCHITECTURE.md) is detailed
+- [ ] Contribution guide (CONTRIBUTING.md) is clear
+- [ ] Changelog (CHANGELOG.md) is updated
+- [ ] FAQ documentation (docs/FAQ.md) is practical
+- [ ] Example projects are complete and runnable
 
-### 🔒 安全性
+### 🔒 Security
 
-- [ ] 输入验证充分
-- [ ] 文件路径遍历防护
-- [ ] 表达式沙盒执行安全
-- [ ] 敏感信息不泄露
-- [ ] 错误信息安全处理
+- [ ] Input validation is sufficient
+- [ ] Protection against file path traversal
+- [ ] Expression sandbox execution is secure
+- [ ] No sensitive information is leaked
+- [ ] Error messages are handled securely
 
-### 🚀 功能验证
+### 🚀 Functional Verification
 
-#### 核心功能
+#### Core Functions
 
-- [ ] CLI 命令行接口正常工作
-- [ ] 帮助信息显示正确
-- [ ] 版本信息显示正确
-- [ ] 参数解析和验证正确
+- [ ] CLI command-line interface works correctly
+- [ ] Help information is displayed correctly
+- [ ] Version information is displayed correctly
+- [ ] Parameter parsing and validation are correct
 
-#### ServiceSpec 解析器
+#### ServiceSpec Parser
 
-- [ ] Java 文件解析正确
-- [ ] TypeScript 文件解析正确
-- [ ] Go 文件解析正确
-- [ ] 错误处理和报告准确
-- [ ] 多语言混合项目支持
+- [ ] Java files are parsed correctly
+- [ ] TypeScript files are parsed correctly
+- [ ] Go files are parsed correctly
+- [ ] Error handling and reporting are accurate
+- [ ] Support for multi-language mixed projects
 
-#### 轨迹摄取器
+#### Trace Ingestor
 
-- [ ] OpenTelemetry JSON 格式解析正确
-- [ ] 大文件处理性能满足要求
-- [ ] 内存使用控制在限制内
-- [ ] 轨迹数据组织和索引正确
+- [ ] OpenTelemetry JSON format is parsed correctly
+- [ ] Performance for large file handling meets requirements
+- [ ] Memory usage is controlled within limits
+- [ ] Trace data organization and indexing are correct
 
-#### 对齐验证引擎
+#### Alignment Validation Engine
 
-- [ ] JSONLogic 表达式评估正确
-- [ ] 前置条件验证准确
-- [ ] 后置条件验证准确
-- [ ] 验证上下文构建正确
-- [ ] 错误详情收集完整
+- [ ] JSONLogic expression evaluation is correct
+- [ ] Precondition validation is accurate
+- [ ] Postcondition validation is accurate
+- [ ] Validation context construction is correct
+- [ ] Error detail collection is complete
 
-#### 报告渲染器
+#### Report Renderer
 
-- [ ] Human 格式输出清晰易读
-- [ ] JSON 格式输出结构正确
-- [ ] 退出码逻辑正确
-- [ ] 统计信息准确
+- [ ] Human-readable format output is clear and easy to read
+- [ ] JSON format output structure is correct
+- [ ] Exit code logic is correct
+- [ ] Statistics are accurate
 
-### 📊 性能要求
+### 📊 Performance Requirements
 
-- [ ] 1,000 个源文件解析 < 30 秒
-- [ ] 100MB 轨迹文件内存使用 < 500MB
-- [ ] 并发处理安全可靠
-- [ ] 资源使用监控正常
+- [ ] Parsing of 1,000 source files < 30 seconds
+- [ ] Memory usage for 100MB trace file < 500MB
+- [ ] Concurrent processing is safe and reliable
+- [ ] Resource usage monitoring is normal
 
-### 🔄 集成测试场景
+### 🔄 Integration Test Scenarios
 
-- [ ] 成功验证场景通过
-- [ ] 前置条件失败场景正确处理
-- [ ] 后置条件失败场景正确处理
-- [ ] 混合场景 (成功/失败/跳过) 正确处理
-- [ ] 错误输入场景正确处理
+- [ ] Successful validation scenarios pass
+- [ ] Precondition failure scenarios are handled correctly
+- [ ] Postcondition failure scenarios are handled correctly
+- [ ] Mixed scenarios (success/failure/skipped) are handled correctly
+- [ ] Error input scenarios are handled correctly
 
-### 🌐 开源就绪性
+### 🌐 Open Source Readiness
 
-- [ ] Apache-2.0 许可证文件存在
-- [ ] 版权声明正确
-- [ ] 第三方依赖许可证兼容
-- [ ] 贡献指南完整
-- [ ] 行为准则明确
+- [ ] Apache-2.0 license file exists
+- [ ] Copyright notice is correct
+- [ ] Third-party dependency licenses are compatible
+- [ ] Contribution guide is complete
+- [ ] Code of conduct is clear
 
-### 🔧 CI/CD 配置
+### 🔧 CI/CD Configuration
 
-- [ ] GitHub Actions 工作流配置正确
-- [ ] 自动化测试运行正常
-- [ ] 发布流程配置完整
-- [ ] 代码质量门禁设置
+- [ ] GitHub Actions workflow is configured correctly
+- [ ] Automated tests run normally
+- [ ] Release process configuration is complete
+- [ ] Code quality gates are set up
 
-### 📦 发布准备
+### 📦 Release Preparation
 
-- [ ] 版本号设置正确
-- [ ] Git 标签准备就绪
-- [ ] 发布说明准备完整
-- [ ] 下载链接和安装说明准确
+- [ ] Version number is set correctly
+- [ ] Git tags are ready
+- [ ] Release notes are complete
+- [ ] Download links and installation instructions are accurate
 
-## 🧪 验收测试执行
+## 🧪 Acceptance Testing Execution
 
-### 自动化验收测试
+### Automated Acceptance Testing
 
-运行完整的自动化验收测试：
+Run the complete automated acceptance tests:
 
 ```bash
 ./scripts/integration-validation.sh
 ```
 
-### 手动验收测试
+### Manual Acceptance Testing
 
-#### 基本功能测试
+#### Basic Functional Testing
 
 ```bash
-# 1. 构建项目
+# 1. Build the project
 make build
 
-# 2. 检查版本信息
+# 2. Check version information
 ./build/flowspec-cli --version
 
-# 3. 检查帮助信息
+# 3. Check help information
 ./build/flowspec-cli --help
 ./build/flowspec-cli align --help
 
-# 4. 运行示例测试
+# 4. Run example tests
 cd examples/simple-user-service
 ./test-example.sh
 ```
 
-#### 端到端测试
+#### End-to-End Testing
 
 ```bash
-# 成功场景
+# Success scenario
 ./build/flowspec-cli align \
   --path=examples/simple-user-service/src \
   --trace=examples/simple-user-service/traces/success-scenario.json \
   --output=human
 
-# 失败场景
+# Failure scenario
 ./build/flowspec-cli align \
   --path=examples/simple-user-service/src \
   --trace=examples/simple-user-service/traces/precondition-failure.json \
   --output=json
 
-# 错误场景
+# Error scenario
 ./build/flowspec-cli align \
   --path=nonexistent \
   --trace=nonexistent.json \
   --output=human
 ```
 
-#### 性能测试
+#### Performance Testing
 
 ```bash
-# 运行性能测试套件
+# Run the performance test suite
 make performance-test
 
-# 运行基准测试
+# Run benchmarks
 make benchmark
 
-# 运行压力测试
+# Run stress tests
 make stress-test
 ```
 
-## 📋 发布检查清单
+## 📋 Release Checklist
 
-### 发布前最终检查
+### Final Pre-release Check
 
-- [ ] 所有上述检查项目都已完成
-- [ ] 自动化验收测试全部通过
-- [ ] 手动验收测试全部通过
-- [ ] 代码审查完成
-- [ ] 文档审查完成
-- [ ] 性能基准测试通过
+- [ ] All the above checklist items are completed
+- [ ] All automated acceptance tests have passed
+- [ ] All manual acceptance tests have passed
+- [ ] Code review is complete
+- [ ] Documentation review is complete
+- [ ] Performance benchmark tests have passed
 
-### 发布执行
+### Release Execution
 
 ```bash
-# 1. 最终代码质量检查
+# 1. Final code quality check
 make ci
 
-# 2. 创建发布版本
+# 2. Create release version
 make release VERSION=1.0.0
 
-# 3. 创建 Git 标签
+# 3. Create Git tag
 make tag VERSION=1.0.0
 
-# 4. 推送标签
+# 4. Push tag
 git push origin v1.0.0
 
-# 5. 在 GitHub 上创建 Release
-# 6. 上传发布包
-# 7. 更新文档和公告
+# 5. Create Release on GitHub
+# 6. Upload release packages
+# 7. Update documentation and announcements
 ```
 
-## 🔍 质量指标
+## 🔍 Quality Metrics
 
-### 代码质量指标
+### Code Quality Metrics
 
-- **测试覆盖率**: >= 80%
-- **代码复杂度**: 保持在合理范围内
-- **技术债务**: 最小化
-- **代码重复**: < 5%
+- **Test Coverage**: >= 80%
+- **Code Complexity**: Kept within a reasonable range
+- **Technical Debt**: Minimized
+- **Code Duplication**: < 5%
 
-### 性能指标
+### Performance Metrics
 
-- **解析性能**: 1,000 文件 < 30 秒
-- **内存使用**: 100MB 文件 < 500MB 内存
-- **启动时间**: < 1 秒
-- **响应时间**: 大部分操作 < 5 秒
+- **Parsing Performance**: 1,000 files < 30 seconds
+- **Memory Usage**: 100MB file < 500MB memory
+- **Startup Time**: < 1 second
+- **Response Time**: Most operations < 5 seconds
 
-### 可靠性指标
+### Reliability Metrics
 
-- **错误率**: < 1%
-- **崩溃率**: 0%
-- **内存泄漏**: 无
-- **资源泄漏**: 无
+- **Error Rate**: < 1%
+- **Crash Rate**: 0%
+- **Memory Leaks**: None
+- **Resource Leaks**: None
 
-## 📝 验收标准
+## 📝 Acceptance Criteria
 
-### 必须满足的标准
+### Must-Have Criteria
 
-1. **功能完整性**: 所有需求文档中的功能都已实现
-2. **质量标准**: 代码质量、测试覆盖率达标
-3. **性能要求**: 满足性能基准要求
-4. **文档完整**: 用户和开发者文档完整
-5. **开源就绪**: 满足开源项目标准
+1.  **Functional Completeness**: All features from the requirements document are implemented.
+2.  **Quality Standards**: Code quality and test coverage meet the targets.
+3.  **Performance Requirements**: Meets performance benchmark requirements.
+4.  **Documentation Completeness**: User and developer documentation is complete.
+5.  **Open Source Readiness**: Meets open source project standards.
 
-### 可选的改进项
+### Nice-to-Have Improvements
 
-1. **用户体验**: 进一步优化用户界面和交互
-2. **性能优化**: 进一步提升性能表现
-3. **功能扩展**: 添加额外的便利功能
-4. **国际化**: 支持多语言界面
+1.  **User Experience**: Further optimize the user interface and interaction.
+2.  **Performance Optimization**: Further improve performance.
+3.  **Feature Extension**: Add additional convenience features.
+4.  **Internationalization**: Support for multiple UI languages.
 
-## 🎯 验收结论
+## 🎯 Acceptance Conclusion
 
-当所有必须满足的标准都达到时，FlowSpec CLI Phase 1 MVP 即可通过验收并准备发布。
+When all must-have criteria are met, the FlowSpec CLI Phase 1 MVP can be accepted and prepared for release.
 
 ---
 
-**检查者**: _______________  
-**检查日期**: _______________  
-**验收结果**: [ ] 通过 [ ] 不通过  
-**备注**: _______________
+**Inspector**: _______________  
+**Inspection Date**: _______________  
+**Acceptance Result**: [ ] Pass [ ] Fail  
+**Notes**: _______________

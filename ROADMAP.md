@@ -1,284 +1,284 @@
-# FlowSpec 产品路线图
+# FlowSpec Product Roadmap
 
-## 版本规划概述
+## Version Planning Overview
 
-FlowSpec 采用语义化版本控制，遵循 `MAJOR.MINOR.PATCH` 格式。本路线图规划了从当前 MVP 版本到未来主要版本的发展方向。
+FlowSpec adopts semantic versioning, following the `MAJOR.MINOR.PATCH` format. This roadmap outlines the development direction from the current MVP version to future major versions.
 
-## Phase 1: MVP 基础版本 (v1.0.0) ✅
+## Phase 1: MVP Base Version (v1.0.0) ✅
 
-**发布时间**: 2025年8月  
-**状态**: 已完成
+**Release Date**: August 2025  
+**Status**: Completed
 
-### 核心功能
-- ✅ 多语言 ServiceSpec 解析器 (Java, TypeScript, Go)
-- ✅ OpenTelemetry 轨迹数据摄取
-- ✅ JSONLogic 断言评估引擎
-- ✅ CLI 工具和报告生成
-- ✅ 基础文档和示例
+### Core Features
+- ✅ Multi-language ServiceSpec parser (Java, TypeScript, Go)
+- ✅ OpenTelemetry trace data ingestion
+- ✅ JSONLogic assertion evaluation engine
+- ✅ CLI tool and report generation
+- ✅ Basic documentation and examples
 
-### 技术指标
-- ✅ 测试覆盖率 ≥ 80%
-- ✅ 支持 1000+ 源文件解析
-- ✅ 基础性能优化
-- ✅ 开源就绪
+### Technical Metrics
+- ✅ Test coverage ≥ 80%
+- ✅ Support for parsing 1000+ source files
+- ✅ Basic performance optimization
+- ✅ Open-source ready
 
-## Phase 2: 稳定性和易用性增强 (v1.1.0 - v1.3.0)
+## Phase 2: Stability and Usability Enhancement (v1.1.0 - v1.3.0)
 
-**预计时间**: 2025年9月 - 2025年11月  
-**主题**: 修复问题，提升用户体验
+**Estimated Time**: September 2025 - November 2025  
+**Theme**: Fixing issues, improving user experience
 
-### v1.1.0 - 问题修复版本 (2025年9月)
-**重点**: 修复 MVP 版本中发现的问题
+### v1.1.0 - Bug Fix Release (September 2025)
+**Focus**: Fix issues found in the MVP version
 
-#### 核心修复
-- 🔧 修复 JSONLogic 评估逻辑问题
-- 🔧 解决并发安全问题 (性能监控模块)
-- 🔧 改进错误处理和用户反馈
-- 🔧 优化内存使用和性能
+#### Core Fixes
+- 🔧 Fix JSONLogic evaluation logic issues
+- 🔧 Resolve concurrency safety issues (performance monitoring module)
+- 🔧 Improve error handling and user feedback
+- 🔧 Optimize memory usage and performance
 
-#### 增强功能
-- 📈 改进性能监控和资源使用报告
-- 📊 增强 Human 格式报告的可读性
-- 🛠️ 添加更多调试和诊断选项
-- 📝 完善文档和示例
+#### Enhanced Features
+- 📈 Improve performance monitoring and resource usage reporting
+- 📊 Enhance readability of Human format reports
+- 🛠️ Add more debugging and diagnostic options
+- 📝 Improve documentation and examples
 
-### v1.2.0 - 易用性增强版本 (2025年10月)
-**重点**: 提升开发者体验
+### v1.2.0 - Usability Enhancement Release (October 2025)
+**Focus**: Improving developer experience
 
-#### 新功能
-- 🎯 配置文件支持 (.flowspec.yaml)
-- 🔍 交互式模式和向导
-- 📱 进度条和实时反馈
-- 🎨 彩色输出和更好的终端体验
+#### New Features
+- 🎯 Configuration file support (.flowspec.yaml)
+- 🔍 Interactive mode and wizard
+- 📱 Progress bar and real-time feedback
+- 🎨 Colorized output and better terminal experience
 
-#### 工具集成
-- 🔌 VS Code 扩展 (基础版本)
-- 🚀 Docker 镜像和容器化支持
-- 📦 包管理器支持 (Homebrew, Chocolatey)
-- 🔄 CI/CD 集成模板
+#### Tool Integration
+- 🔌 VS Code extension (basic version)
+- 🚀 Docker image and containerization support
+- 📦 Package manager support (Homebrew, Chocolatey)
+- 🔄 CI/CD integration templates
 
-### v1.3.0 - 扩展性版本 (2025年11月)
-**重点**: 扩展语言和格式支持
+### v1.3.0 - Extensibility Release (November 2025)
+**Focus**: Expanding language and format support
 
-#### 语言支持扩展
-- 🐍 Python 支持
-- 🔷 C# 支持
-- ☕ Kotlin 支持
-- 🦀 Rust 支持 (实验性)
+#### Language Support Expansion
+- 🐍 Python support
+- 🔷 C# support
+- ☕ Kotlin support
+- 🦀 Rust support (experimental)
 
-#### 格式支持
-- 📄 YAML 格式的 ServiceSpec 定义
-- 🌐 OpenAPI/Swagger 集成
-- 📊 Jaeger 轨迹格式支持
-- 🔗 Zipkin 轨迹格式支持
+#### Format Support
+- 📄 YAML format for ServiceSpec definitions
+- 🌐 OpenAPI/Swagger integration
+- 📊 Jaeger trace format support
+- 🔗 Zipkin trace format support
 
-## Phase 3: 高级功能和企业特性 (v2.0.0 - v2.2.0)
+## Phase 3: Advanced Features and Enterprise Capabilities (v2.0.0 - v2.2.0)
 
-**预计时间**: 2025年12月 - 2026年3月  
-**主题**: 企业级功能和高级特性
+**Estimated Time**: December 2025 - March 2026  
+**Theme**: Enterprise-level features and advanced capabilities
 
-### v2.0.0 - 架构升级版本 (2025年12月)
-**重点**: 重大架构改进和新特性
+### v2.0.0 - Architectural Upgrade Release (December 2025)
+**Focus**: Major architectural improvements and new features
 
-#### 架构改进
-- 🏗️ 插件系统架构
-- 🔄 流式处理引擎重构
-- 💾 持久化存储支持
-- 🌐 Web API 服务模式
+#### Architectural Improvements
+- 🏗️ Plugin system architecture
+- 🔄 Stream processing engine refactoring
+- 💾 Persistence storage support
+- 🌐 Web API service mode
 
-#### 高级验证功能
-- 🔗 跨服务验证支持
-- ⏱️ 时序约束验证
-- 📊 统计和聚合断言
-- 🎯 条件验证和分支逻辑
+#### Advanced Validation Features
+- 🔗 Cross-service validation support
+- ⏱️ Temporal constraint validation
+- 📊 Statistical and aggregate assertions
+- 🎯 Conditional validation and branching logic
 
-#### 企业特性
-- 👥 多租户支持
-- 🔐 认证和授权
-- 📈 指标和监控集成
-- 🗄️ 数据库存储支持
+#### Enterprise Features
+- 👥 Multi-tenancy support
+- 🔐 Authentication and authorization
+- 📈 Metrics and monitoring integration
+- 🗄️ Database storage support
 
-### v2.1.0 - 可视化和分析版本 (2026年1月)
-**重点**: 可视化界面和数据分析
+### v2.1.0 - Visualization and Analytics Release (January 2026)
+**Focus**: Visual interface and data analysis
 
-#### Web 界面
-- 🖥️ Web 控制台
-- 📊 交互式报告和图表
-- 🔍 轨迹可视化和分析
-- 📱 响应式设计
+#### Web Interface
+- 🖥️ Web console
+- 📊 Interactive reports and charts
+- 🔍 Trace visualization and analysis
+- 📱 Responsive design
 
-#### 数据分析
-- 📈 趋势分析和历史对比
-- 🎯 热点分析和性能洞察
-- 🚨 异常检测和告警
-- 📋 自定义仪表板
+#### Data Analysis
+- 📈 Trend analysis and historical comparison
+- 🎯 Hotspot analysis and performance insights
+- 🚨 Anomaly detection and alerting
+- 📋 Custom dashboards
 
-#### 集成生态
-- 🔌 Grafana 插件
-- 📊 Prometheus 指标导出
-- 🔔 Slack/Teams 通知集成
-- 📧 邮件报告功能
+#### Integration Ecosystem
+- 🔌 Grafana plugin
+- 📊 Prometheus metrics export
+- 🔔 Slack/Teams notification integration
+- 📧 Email reporting feature
 
-### v2.2.0 - 智能化版本 (2026年2月)
-**重点**: AI/ML 功能和智能分析
+### v2.2.0 - Intelligent Release (February 2026)
+**Focus**: AI/ML features and intelligent analysis
 
-#### 机器学习功能
-- 🤖 异常模式检测
-- 📊 性能基线学习
-- 🎯 智能规约建议
-- 🔮 预测性分析
+#### Machine Learning Features
+- 🤖 Anomaly pattern detection
+- 📊 Performance baseline learning
+- 🎯 Intelligent specification suggestions
+- 🔮 Predictive analysis
 
-#### 智能助手
-- 💬 自然语言查询
-- 🛠️ 自动修复建议
-- 📝 规约生成助手
-- 🎓 最佳实践推荐
+#### Intelligent Assistant
+- 💬 Natural language queries
+- 🛠️ Automated fix suggestions
+- 📝 Specification generation assistant
+- 🎓 Best practice recommendations
 
-## Phase 4: 生态系统和平台化 (v3.0.0+)
+## Phase 4: Ecosystem and Platformization (v3.0.0+)
 
-**预计时间**: 2026年4月开始  
-**主题**: 平台化和生态建设
+**Estimated Time**: Starting April 2026  
+**Theme**: Platformization and ecosystem building
 
-### v3.0.0 - 平台化版本 (2026年4月)
-**重点**: 构建完整的 FlowSpec 平台
+### v3.0.0 - Platformization Release (April 2026)
+**Focus**: Building a complete FlowSpec platform
 
-#### 平台特性
-- 🏢 SaaS 服务版本
-- 🔌 开放 API 平台
-- 🛒 插件市场
-- 👥 社区和协作功能
+#### Platform Features
+- 🏢 SaaS service version
+- 🔌 Open API platform
+- 🛒 Plugin marketplace
+- 👥 Community and collaboration features
 
-#### 企业解决方案
-- 🏭 私有部署版本
-- 🔒 企业安全和合规
-- 📊 企业级报告和分析
-- 🎯 定制化服务
+#### Enterprise Solutions
+- 🏭 Private deployment version
+- 🔒 Enterprise security and compliance
+- 📊 Enterprise-grade reporting and analytics
+- 🎯 Customization services
 
-### 后续版本规划
+### Subsequent Version Plans
 
-#### v3.1.0 - 移动和边缘支持
-- 📱 移动应用支持
-- 🌐 边缘计算集成
-- ☁️ 多云部署支持
-- 🔄 离线模式支持
+#### v3.1.0 - Mobile and Edge Support
+- 📱 Mobile application support
+- 🌐 Edge computing integration
+- ☁️ Multi-cloud deployment support
+- 🔄 Offline mode support
 
-#### v3.2.0 - 国际化和本地化
-- 🌍 多语言界面支持
-- 🏛️ 合规性和标准支持
-- 🎨 主题和定制化
-- 📍 地区化功能
+#### v3.2.0 - Internationalization and Localization
+- 🌍 Multi-language interface support
+- 🏛️ Compliance and standards support
+- 🎨 Themes and customization
+- 📍 Regional features
 
-## 技术路线图
+## Technical Roadmap
 
-### 核心技术演进
+### Core Technology Evolution
 
-#### 解析引擎
-- **v1.x**: 基于正则表达式的解析
-- **v2.x**: AST 解析和语义分析
-- **v3.x**: 基于 LSP 的智能解析
+#### Parsing Engine
+- **v1.x**: Regex-based parsing
+- **v2.x**: AST parsing and semantic analysis
+- **v3.x**: LSP-based intelligent parsing
 
-#### 验证引擎
-- **v1.x**: JSONLogic 基础验证
-- **v2.x**: 自定义 DSL 和复杂验证
-- **v3.x**: AI 辅助验证和学习
+#### Validation Engine
+- **v1.x**: Basic JSONLogic validation
+- **v2.x**: Custom DSL and complex validation
+- **v3.x**: AI-assisted validation and learning
 
-#### 存储和处理
-- **v1.x**: 内存处理
-- **v2.x**: 流式处理和持久化
-- **v3.x**: 分布式处理和大数据支持
+#### Storage and Processing
+- **v1.x**: In-memory processing
+- **v2.x**: Stream processing and persistence
+- **v3.x**: Distributed processing and big data support
 
-### 性能目标
+### Performance Goals
 
-#### v1.x 目标
-- ✅ 1,000 文件 < 30 秒
-- ✅ 100MB 轨迹 < 500MB 内存
-- ✅ 基础并发支持
+#### v1.x Goals
+- ✅ 1,000 files < 30 seconds
+- ✅ 100MB trace < 500MB memory
+- ✅ Basic concurrency support
 
-#### v2.x 目标
-- 🎯 10,000 文件 < 60 秒
-- 🎯 1GB 轨迹 < 1GB 内存
-- 🎯 高并发和分布式处理
+#### v2.x Goals
+- 🎯 10,000 files < 60 seconds
+- 🎯 1GB trace < 1GB memory
+- 🎯 High concurrency and distributed processing
 
-#### v3.x 目标
-- 🎯 100,000+ 文件支持
-- 🎯 实时流式处理
-- 🎯 云原生和弹性扩展
+#### v3.x Goals
+- 🎯 100,000+ file support
+- 🎯 Real-time stream processing
+- 🎯 Cloud-native and elastic scaling
 
-## 社区和生态建设
+## Community and Ecosystem Building
 
-### 开源社区发展
+### Open Source Community Development
 
-#### 短期目标 (6 个月)
+#### Short-Term Goals (6 months)
 - 🎯 100+ GitHub Stars
-- 👥 10+ 活跃贡献者
-- 📦 5+ 社区插件
-- 📚 完整的开发者文档
+- 👥 10+ active contributors
+- 📦 5+ community plugins
+- 📚 Complete developer documentation
 
-#### 中期目标 (1 年)
+#### Mid-Term Goals (1 year)
 - 🎯 1,000+ GitHub Stars
-- 👥 50+ 活跃贡献者
-- 🏢 10+ 企业用户
-- 🌍 多语言社区支持
+- 👥 50+ active contributors
+- 🏢 10+ enterprise users
+- 🌍 Multi-language community support
 
-#### 长期目标 (2 年)
+#### Long-Term Goals (2 years)
 - 🎯 5,000+ GitHub Stars
-- 👥 200+ 贡献者
-- 🏢 100+ 企业用户
-- 🏆 行业标准地位
+- 👥 200+ contributors
+- 🏢 100+ enterprise users
+- 🏆 Industry standard status
 
-### 合作伙伴关系
+### Partnerships
 
-#### 技术合作
-- 🤝 OpenTelemetry 社区合作
-- 🔗 云服务提供商集成
-- 🛠️ 开发工具厂商合作
-- 📊 监控平台集成
+#### Technical Cooperation
+- 🤝 OpenTelemetry community collaboration
+- 🔗 Cloud service provider integration
+- 🛠️ Development tool vendor collaboration
+- 📊 Monitoring platform integration
 
-#### 学术合作
-- 🎓 高校研究项目
-- 📄 学术论文发表
-- 🏆 开源奖项申请
-- 📚 教育资源开发
+#### Academic Cooperation
+- 🎓 University research projects
+- 📄 Academic paper publications
+- 🏆 Open source award applications
+- 📚 Educational resource development
 
-## 风险和挑战
+## Risks and Challenges
 
-### 技术风险
-- 🚨 **性能瓶颈**: 大规模数据处理挑战
-- 🔧 **兼容性**: 多语言和格式支持复杂性
-- 🛡️ **安全性**: 企业级安全要求
-- 🔄 **维护性**: 代码复杂度增长
+### Technical Risks
+- 🚨 **Performance Bottlenecks**: Challenges in large-scale data processing
+- 🔧 **Compatibility**: Complexity of multi-language and format support
+- 🛡️ **Security**: Enterprise-level security requirements
+- 🔄 **Maintainability**: Growth in code complexity
 
-### 市场风险
-- 📈 **竞争**: 类似工具的出现
-- 👥 **采用**: 用户接受度和学习成本
-- 💰 **商业化**: 可持续发展模式
-- 🌍 **标准化**: 行业标准的变化
+### Market Risks
+- 📈 **Competition**: Emergence of similar tools
+- 👥 **Adoption**: User acceptance and learning curve
+- 💰 **Monetization**: Sustainable development model
+- 🌍 **Standardization**: Changes in industry standards
 
-### 应对策略
-- 🎯 **专注核心价值**: 保持产品核心竞争力
-- 👥 **社区建设**: 建立强大的用户和开发者社区
-- 🔄 **敏捷开发**: 快速响应市场变化
-- 🤝 **合作共赢**: 与生态伙伴建立合作关系
+### Mitigation Strategies
+- 🎯 **Focus on Core Value**: Maintain the product's core competitiveness
+- 👥 **Community Building**: Build a strong user and developer community
+- 🔄 **Agile Development**: Respond quickly to market changes
+- 🤝 **Win-Win Cooperation**: Establish partnerships with ecosystem partners
 
-## 贡献指南
+## Contribution Guide
 
-### 如何参与
-1. 🐛 **报告问题**: 在 GitHub Issues 中报告 bug
-2. 💡 **功能建议**: 提出新功能和改进建议
-3. 🔧 **代码贡献**: 提交 Pull Request
-4. 📚 **文档改进**: 完善文档和示例
-5. 🎯 **测试反馈**: 参与 Beta 版本测试
+### How to Participate
+1. 🐛 **Report Issues**: Report bugs in GitHub Issues
+2. 💡 **Feature Suggestions**: Propose new features and improvements
+3. 🔧 **Code Contributions**: Submit Pull Requests
+4. 📚 **Documentation Improvements**: Improve documentation and examples
+5. 🎯 **Testing Feedback**: Participate in Beta version testing
 
-### 开发者资源
-- 📖 [开发者文档](docs/DEVELOPMENT.md)
-- 🏗️ [架构指南](docs/ARCHITECTURE.md)
-- 🧪 [测试指南](docs/TESTING.md)
-- 🎨 [设计规范](docs/DESIGN.md)
+### Developer Resources
+- 📖 [Developer Documentation](docs/DEVELOPMENT.md)
+- 🏗️ [Architecture Guide](docs/ARCHITECTURE.md)
+- 🧪 [Testing Guide](docs/TESTING.md)
+- 🎨 [Design Specifications](docs/DESIGN.md)
 
 ---
 
-**路线图版本**: v1.0  
-**最后更新**: 2025年8月4日  
-**下次更新**: 2025年9月1日
+**Roadmap Version**: v1.0  
+**Last Updated**: August 4, 2025  
+**Next Update**: September 1, 2025
 
-> 本路线图是动态文档，会根据社区反馈、技术发展和市场需求进行调整。欢迎社区成员提供意见和建议。
+> This roadmap is a living document and will be adjusted based on community feedback, technological developments, and market demands. Community members are welcome to provide opinions and suggestions.

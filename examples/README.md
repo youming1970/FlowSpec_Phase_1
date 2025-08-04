@@ -1,172 +1,172 @@
-# FlowSpec CLI 示例项目
+# FlowSpec CLI Example Projects
 
-本目录包含了使用 FlowSpec CLI 的示例项目，展示了如何在不同语言和场景中使用 ServiceSpec 注解。
+This directory contains example projects for using the FlowSpec CLI, demonstrating how to use ServiceSpec annotations in different languages and scenarios.
 
-## 示例列表
+## Example List
 
-### 1. [简单用户服务](simple-user-service/)
-- **语言**: Java
-- **场景**: 基本的 CRUD 操作
-- **特点**: 展示基础的前置条件和后置条件
+### 1. [Simple User Service](simple-user-service/)
+- **Language**: Java
+- **Scenario**: Basic CRUD operations
+- **Features**: Demonstrates basic preconditions and postconditions
 
-### 2. [电商订单服务](ecommerce-order-service/)
-- **语言**: TypeScript
-- **场景**: 复杂的业务逻辑验证
-- **特点**: 多步骤流程验证，错误处理
+### 2. [E-commerce Order Service](ecommerce-order-service/)
+- **Language**: TypeScript
+- **Scenario**: Complex business logic validation
+- **Features**: Multi-step process validation, error handling
 
-### 3. [微服务网关](microservice-gateway/)
-- **语言**: Go
-- **场景**: 服务间通信验证
-- **特点**: 分布式轨迹验证，性能监控
+### 3. [Microservice Gateway](microservice-gateway/)
+- **Language**: Go
+- **Scenario**: Inter-service communication validation
+- **Features**: Distributed trace validation, performance monitoring
 
-### 4. [多语言混合项目](polyglot-project/)
-- **语言**: Java + TypeScript + Go
-- **场景**: 多语言项目集成
-- **特点**: 跨语言服务验证
+### 4. [Polyglot Project](polyglot-project/)
+- **Language**: Java + TypeScript + Go
+- **Scenario**: Multi-language project integration
+- **Features**: Cross-language service validation
 
-## 快速开始
+## Quick Start
 
-### 运行示例
+### Running Examples
 
 ```bash
-# 进入示例目录
+# Navigate to an example directory
 cd examples/simple-user-service
 
-# 运行 FlowSpec 验证
+# Run FlowSpec validation
 flowspec-cli align \
   --path=./src \
   --trace=./traces/success-scenario.json \
   --output=human
 
-# 查看 JSON 格式报告
+# View the report in JSON format
 flowspec-cli align \
   --path=./src \
   --trace=./traces/success-scenario.json \
   --output=json
 ```
 
-### 生成轨迹数据
+### Generating Trace Data
 
-每个示例项目都包含了生成轨迹数据的脚本：
+Each example project includes scripts to generate trace data:
 
 ```bash
-# 运行应用并生成轨迹
+# Run the application and generate traces
 ./scripts/generate-traces.sh
 
-# 查看生成的轨迹文件
+# View the generated trace files
 ls -la traces/
 ```
 
-## 示例场景
+## Example Scenarios
 
-### 成功场景
-- 所有 ServiceSpec 断言都通过
-- 展示正常的业务流程验证
+### Success Scenarios
+- All ServiceSpec assertions pass
+- Demonstrates validation of normal business flows
 
-### 失败场景
-- 前置条件失败
-- 后置条件失败
-- 混合场景（部分成功，部分失败）
+### Failure Scenarios
+- Precondition failures
+- Postcondition failures
+- Mixed scenarios (partially successful, partially failed)
 
-### 边界情况
-- 缺失轨迹数据
-- 格式错误的注解
-- 性能压力测试
+### Edge Cases
+- Missing trace data
+- Malformed annotations
+- Performance stress tests
 
-## 学习路径
+## Learning Path
 
-### 初学者
-1. 从 [简单用户服务](simple-user-service/) 开始
-2. 理解基本的 ServiceSpec 注解格式
-3. 学习如何编写简单的断言表达式
+### Beginners
+1.  Start with the [Simple User Service](simple-user-service/).
+2.  Understand the basic format of ServiceSpec annotations.
+3.  Learn how to write simple assertion expressions.
 
-### 进阶用户
-1. 查看 [电商订单服务](ecommerce-order-service/) 的复杂业务逻辑
-2. 学习 JSONLogic 的高级用法
-3. 了解错误处理和边界情况
+### Intermediate Users
+1.  Examine the complex business logic in the [E-commerce Order Service](ecommerce-order-service/).
+2.  Learn advanced usage of JSONLogic.
+3.  Understand error handling and edge cases.
 
-### 高级用户
-1. 研究 [微服务网关](microservice-gateway/) 的分布式验证
-2. 学习性能优化技巧
-3. 探索 [多语言混合项目](polyglot-project/) 的集成方案
+### Advanced Users
+1.  Study the distributed validation in the [Microservice Gateway](microservice-gateway/).
+2.  Learn performance optimization techniques.
+3.  Explore the integration solution in the [Polyglot Project](polyglot-project/).
 
-## 最佳实践
+## Best Practices
 
-### ServiceSpec 注解编写
-- 使用有意义的 `operationId`
-- 编写清晰的 `description`
-- 保持断言表达式简洁明了
-- 考虑边界情况和错误处理
+### Writing ServiceSpec Annotations
+- Use meaningful `operationId`s.
+- Write clear `description`s.
+- Keep assertion expressions concise and clear.
+- Consider edge cases and error handling.
 
-### 轨迹数据生成
-- 确保 Span 名称与 `operationId` 匹配
-- 包含足够的属性信息用于断言
-- 记录完整的请求和响应数据
-- 保持轨迹数据的时间顺序
+### Generating Trace Data
+- Ensure Span names match the `operationId`.
+- Include sufficient attribute information for assertions.
+- Record complete request and response data.
+- Maintain the chronological order of trace data.
 
-### 项目集成
-- 将 FlowSpec 验证集成到 CI/CD 流程
-- 定期更新轨迹数据
-- 监控验证结果趋势
-- 建立验证失败的处理流程
+### Project Integration
+- Integrate FlowSpec validation into your CI/CD pipeline.
+- Regularly update trace data.
+- Monitor validation result trends.
+- Establish a process for handling validation failures.
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **找不到 ServiceSpec**
-   - 检查文件路径和扩展名
-   - 验证注解格式是否正确
+1.  **ServiceSpec Not Found**
+    -   Check file paths and extensions.
+    -   Verify the annotation format is correct.
 
-2. **轨迹匹配失败**
-   - 确保 `operationId` 与 Span 名称匹配
-   - 检查轨迹数据的完整性
+2.  **Trace Matching Failed**
+    -   Ensure the `operationId` matches the Span name.
+    -   Check the integrity of the trace data.
 
-3. **断言评估错误**
-   - 验证 JSONLogic 表达式语法
-   - 检查变量路径是否正确
+3.  **Assertion Evaluation Error**
+    -   Validate the JSONLogic expression syntax.
+    -   Check if the variable paths are correct.
 
-### 调试技巧
+### Debugging Tips
 
 ```bash
-# 启用详细输出
+# Enable verbose output
 flowspec-cli align --path=./src --trace=./trace.json --verbose
 
-# 使用调试日志级别
+# Use debug log level
 flowspec-cli align --path=./src --trace=./trace.json --log-level=debug
 
-# 检查解析结果
+# Check parsing results
 flowspec-cli align --path=./src --trace=./trace.json --output=json | jq .
 ```
 
-## 贡献示例
+## Contributing Examples
 
-我们欢迎贡献新的示例项目！请遵循以下指南：
+We welcome contributions of new example projects! Please follow these guidelines:
 
-### 示例项目结构
+### Example Project Structure
 ```
 example-name/
-├── README.md           # 示例说明
-├── src/               # 源代码
-├── traces/            # 轨迹数据文件
-├── scripts/           # 辅助脚本
-└── expected-results/  # 预期验证结果
+├── README.md           # Example description
+├── src/               # Source code
+├── traces/            # Trace data files
+├── scripts/           # Helper scripts
+└── expected-results/  # Expected validation results
 ```
 
-### 提交要求
-- 包含完整的 README.md 说明
-- 提供多种场景的轨迹数据
-- 包含预期的验证结果
-- 添加必要的注释和文档
+### Submission Requirements
+- Include a complete README.md.
+- Provide trace data for various scenarios.
+- Include expected validation results.
+- Add necessary comments and documentation.
 
-## 反馈和建议
+## Feedback and Suggestions
 
-如果您对示例有任何建议或发现问题，请：
+If you have any suggestions for the examples or find any issues, please:
 
-1. 在 [GitHub Issues](../../../issues) 中报告问题
-2. 在 [GitHub Discussions](../../../discussions) 中讨论改进建议
-3. 提交 Pull Request 贡献新的示例
+1.  Report issues in [GitHub Issues](../../../issues).
+2.  Discuss improvements in [GitHub Discussions](../../../discussions).
+3.  Submit a Pull Request to contribute a new example.
 
 ---
 
-**提示**: 这些示例会随着 FlowSpec CLI 的发展而持续更新，建议定期查看最新版本。
+**Tip**: These examples will be continuously updated with the development of the FlowSpec CLI. It is recommended to check the latest version regularly.

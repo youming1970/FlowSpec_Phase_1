@@ -1,160 +1,160 @@
-# 变更日志
+# Changelog
 
-本文档记录了 FlowSpec CLI 项目的所有重要变更。
+This document records all important changes to the FlowSpec CLI project.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
-版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [未发布]
+## [Unreleased]
 
-### 新增
-- 完整的项目文档套件
-- Apache-2.0 开源许可证
-- 贡献指南和开发文档
+### Added
+- Complete project documentation suite.
+- Apache-2.0 open source license.
+- Contribution guide and development documentation.
 
-### 变更
-- 优化 README.md 格式和内容
-- 完善 Makefile 构建脚本
+### Changed
+- Optimized README.md format and content.
+- Improved Makefile build scripts.
 
-## [0.1.0] - 2024-01-XX (计划中)
+## [0.1.0] - 2024-01-XX (Planned)
 
-### 新增
-- 🎉 FlowSpec CLI Phase 1 MVP 首次发布
-- 📝 多语言 ServiceSpec 解析器 (Java, TypeScript, Go)
-- 📊 OpenTelemetry 轨迹数据摄取器
-- ✅ JSONLogic 断言评估引擎
-- 📋 Human 和 JSON 格式报告渲染器
-- 🔧 完整的命令行接口
-- 🧪 全面的测试套件 (单元测试 + 集成测试)
-- 📖 完整的项目文档
+### Added
+- 🎉 First release of FlowSpec CLI Phase 1 MVP.
+- 📝 Multi-language ServiceSpec parser (Java, TypeScript, Go).
+- 📊 OpenTelemetry trace data ingestor.
+- ✅ JSONLogic assertion evaluation engine.
+- 📋 Human and JSON format report renderer.
+- 🔧 Complete command-line interface.
+- 🧪 Comprehensive test suite (unit tests + integration tests).
+- 📖 Complete project documentation.
 
-### 功能特性
-- **多语言支持**: 支持 Java、TypeScript、Go 源代码解析
-- **轨迹处理**: 支持 OpenTelemetry JSON 格式轨迹数据
-- **断言引擎**: 基于 JSONLogic 的强大断言表达式
-- **报告生成**: 人类可读和机器可读的验证报告
-- **性能优化**: 并行处理、流式解析、内存控制
-- **容错处理**: 优雅的错误处理和恢复机制
+### Features
+- **Multi-language Support**: Supports parsing of Java, TypeScript, and Go source code.
+- **Trace Processing**: Supports OpenTelemetry JSON format trace data.
+- **Assertion Engine**: Powerful assertion expressions based on JSONLogic.
+- **Report Generation**: Human-readable and machine-readable validation reports.
+- **Performance Optimization**: Parallel processing, stream parsing, memory control.
+- **Fault Tolerance**: Graceful error handling and recovery mechanisms.
 
-### 性能基准
-- 解析性能: 1,000 个源文件，200 个 ServiceSpecs，< 30 秒
-- 内存使用: 100MB 轨迹文件，峰值内存 < 500MB
-- 测试覆盖率: 核心模块 > 80%
+### Performance Benchmarks
+- Parsing performance: 1,000 source files, 200 ServiceSpecs, < 30 seconds.
+- Memory usage: 100MB trace file, peak memory < 500MB.
+- Test coverage: Core modules > 80%.
 
-### 技术栈
-- **语言**: Go 1.21+
-- **CLI 框架**: Cobra
-- **断言引擎**: JSONLogic
-- **日志系统**: Logrus
-- **测试框架**: Go testing + Testify
+### Tech Stack
+- **Language**: Go 1.21+
+- **CLI Framework**: Cobra
+- **Assertion Engine**: JSONLogic
+- **Logging System**: Logrus
+- **Testing Framework**: Go testing + Testify
 
-## 开发历程
+## Development History
 
-### Phase 1 开发里程碑
+### Phase 1 Development Milestones
 
-#### 2024-01-XX - 项目启动
-- 项目初始化和架构设计
-- 核心数据模型定义
-- 开发环境搭建
+#### 2024-01-XX - Project Kick-off
+- Project initialization and architecture design.
+- Core data model definition.
+- Development environment setup.
 
-#### 2024-01-XX - 解析器开发
-- Java 文件解析器实现
-- TypeScript 文件解析器实现
-- Go 文件解析器实现
-- 多语言解析器集成
+#### 2024-01-XX - Parser Development
+- Java file parser implementation.
+- TypeScript file parser implementation.
+- Go file parser implementation.
+- Multi-language parser integration.
 
-#### 2024-01-XX - 轨迹摄取器开发
-- OpenTelemetry JSON 解析器
-- 轨迹数据组织和索引
-- 大文件处理和内存优化
-- 流式解析实现
+#### 2024-01-XX - Trace Ingestor Development
+- OpenTelemetry JSON parser.
+- Trace data organization and indexing.
+- Large file handling and memory optimization.
+- Stream parsing implementation.
 
-#### 2024-01-XX - 对齐引擎开发
-- JSONLogic 断言评估引擎
-- 规约与轨迹匹配逻辑
-- 验证上下文构建
-- 断言失败详情收集
+#### 2024-01-XX - Alignment Engine Development
+- JSONLogic assertion evaluation engine.
+- Specification and trace matching logic.
+- Validation context construction.
+- Assertion failure detail collection.
 
-#### 2024-01-XX - CLI 和报告系统
-- 命令行接口实现
-- Human 格式报告渲染
-- JSON 格式报告输出
-- 退出码管理
+#### 2024-01-XX - CLI and Reporting System
+- Command-line interface implementation.
+- Human format report rendering.
+- JSON format report output.
+- Exit code management.
 
-#### 2024-01-XX - 测试和质量保证
-- 单元测试套件完成
-- 集成测试场景实现
-- 性能和压力测试
-- 代码覆盖率达标
+#### 2024-01-XX - Testing and Quality Assurance
+- Unit test suite completion.
+- Integration test scenario implementation.
+- Performance and stress testing.
+- Code coverage target achievement.
 
-#### 2024-01-XX - 文档和开源准备
-- 完整项目文档编写
-- 开源许可证添加
-- 贡献指南制定
-- 发布准备完成
+#### 2024-01-XX - Documentation and Open Source Preparation
+- Complete project documentation writing.
+- Addition of open source license.
+- Formulation of contribution guide.
+- Release preparation completion.
 
-## 已知问题
+## Known Issues
 
-### 当前版本限制
-- 仅支持 OpenTelemetry JSON 格式轨迹数据
-- ServiceSpec 断言语言限制为 JSONLogic
-- 不支持实时轨迹流处理
-- 暂无 Web UI 界面
+### Current Version Limitations
+- Only supports OpenTelemetry JSON format trace data.
+- ServiceSpec assertion language is limited to JSONLogic.
+- Does not support real-time trace stream processing.
+- No Web UI interface at present.
 
-### 计划修复
-这些限制将在后续版本中逐步解决。
+### Planned Fixes
+These limitations will be gradually addressed in subsequent versions.
 
-## 路线图
+## Roadmap
 
-### Phase 2 (计划中)
-- [ ] 支持更多编程语言 (Python, C#, Rust)
-- [ ] 实时轨迹流处理
-- [ ] 性能分析和优化建议
-- [ ] 更丰富的断言表达式语法
+### Phase 2 (Planned)
+- [ ] Support for more programming languages (Python, C#, Rust).
+- [ ] Real-time trace stream processing.
+- [ ] Performance analysis and optimization suggestions.
+- [ ] Richer assertion expression syntax.
 
-### Phase 3 (计划中)
-- [ ] Web UI 界面
-- [ ] 分布式验证支持
-- [ ] 插件系统
-- [ ] 云原生集成
+### Phase 3 (Planned)
+- [ ] Web UI interface.
+- [ ] Distributed validation support.
+- [ ] Plugin system.
+- [ ] Cloud-native integration.
 
-### 长期规划
-- [ ] 机器学习驱动的异常检测
-- [ ] 自动化测试生成
-- [ ] 服务依赖图可视化
-- [ ] 多云平台支持
+### Long-term Planning
+- [ ] Machine learning-driven anomaly detection.
+- [ ] Automated test generation.
+- [ ] Service dependency graph visualization.
+- [ ] Multi-cloud platform support.
 
-## 贡献者
+## Contributors
 
-感谢所有为 FlowSpec CLI 做出贡献的开发者：
+Thanks to all the developers who contributed to the FlowSpec CLI project:
 
-- [@contributor1](https://github.com/contributor1) - 项目发起人和主要开发者
-- [@contributor2](https://github.com/contributor2) - 解析器模块开发
-- [@contributor3](https://github.com/contributor3) - 测试和文档
+- [@contributor1](https://github.com/contributor1) - Project initiator and main developer.
+- [@contributor2](https://github.com/contributor2) - Parser module development.
+- [@contributor3](https://github.com/contributor3) - Testing and documentation.
 
-## 致谢
+## Acknowledgements
 
-特别感谢以下开源项目和社区：
+Special thanks to the following open source projects and communities:
 
-- [Cobra](https://github.com/spf13/cobra) - 强大的 CLI 框架
-- [JSONLogic](https://jsonlogic.com/) - 灵活的断言表达式引擎
-- [OpenTelemetry](https://opentelemetry.io/) - 可观测性标准
-- [Logrus](https://github.com/sirupsen/logrus) - 结构化日志库
-- [Testify](https://github.com/stretchr/testify) - 测试工具包
+- [Cobra](https://github.com/spf13/cobra) - A powerful CLI framework.
+- [JSONLogic](https://jsonlogic.com/) - A flexible assertion expression engine.
+- [OpenTelemetry](https://opentelemetry.io/) - An observability standard.
+- [Logrus](https://github.com/sirupsen/logrus) - A structured logging library.
+- [Testify](https://github.com/stretchr/testify) - A testing toolkit.
 
-## 许可证变更
+## License Changes
 
-- **2024-01-XX**: 项目采用 Apache-2.0 许可证开源
+- **2024-01-XX**: The project is open-sourced under the Apache-2.0 license.
 
-## 安全更新
+## Security Updates
 
-目前没有安全相关的更新。如果发现安全问题，请发送邮件到 security@example.com。
+There are currently no security-related updates. If you find a security issue, please send an email to security@example.com.
 
 ---
 
-**注意**: 
-- 所有日期为计划日期，实际发布时间可能有所调整
-- 功能特性可能根据用户反馈进行调整
-- 我们承诺在主要版本发布前保持向后兼容性
+**Note**: 
+- All dates are planned dates, actual release times may be adjusted.
+- Features may be adjusted based on user feedback.
+- We promise to maintain backward compatibility before major version releases.
 
-如果您有任何问题或建议，欢迎在 [GitHub Issues](../../issues) 中提出。
+If you have any questions or suggestions, feel free to raise them in [GitHub Issues](../../issues).
