@@ -10,15 +10,15 @@ import (
 	"strconv"
 	"strings"
 
-	"flowspec-cli/internal/models"
+	"github.com/flowspec/flowspec-cli/internal/models"
 	"gopkg.in/yaml.v3"
 )
 
 // BaseFileParser provides common functionality for parsing ServiceSpec annotations
 type BaseFileParser struct {
-	language         SupportedLanguage
-	commentPatterns  []CommentPattern
-	errorCollector   *ErrorCollector
+	language        SupportedLanguage
+	commentPatterns []CommentPattern
+	errorCollector  *ErrorCollector
 }
 
 // CommentPattern defines how comments are structured in different languages
@@ -110,29 +110,29 @@ func getCommentPatterns(language SupportedLanguage) []CommentPattern {
 // ParseFile parses a file and extracts ServiceSpec annotations
 func (bp *BaseFileParser) ParseFile(filepath string) ([]models.ServiceSpec, []models.ParseError) {
 	bp.errorCollector.Clear()
-	
+
 	file, err := os.Open(filepath)
 	if err != nil {
 		bp.errorCollector.AddError(filepath, 0, fmt.Sprintf("failed to open file: %s", err.Error()))
 		return []models.ServiceSpec{}, bp.errorCollector.GetErrors()
 	}
 	defer file.Close()
-	
+
 	// Read file line by line
 	scanner := bufio.NewScanner(file)
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		bp.errorCollector.AddError(filepath, 0, fmt.Sprintf("failed to read file: %s", err.Error()))
 		return []models.ServiceSpec{}, bp.errorCollector.GetErrors()
 	}
-	
+
 	// Extract ServiceSpec annotations
 	annotations := bp.extractServiceSpecAnnotations(lines, filepath)
-	
+
 	// Convert annotations to ServiceSpec objects
 	var specs []models.ServiceSpec
 	for _, annotation := range annotations {
@@ -143,17 +143,17 @@ func (bp *BaseFileParser) ParseFile(filepath string) ([]models.ServiceSpec, []mo
 		}
 		specs = append(specs, spec)
 	}
-	
+
 	return specs, bp.errorCollector.GetErrors()
 }
 
 // extractServiceSpecAnnotations finds and extracts ServiceSpec annotations from file lines
 func (bp *BaseFileParser) extractServiceSpecAnnotations(lines []string, filepath string) []ServiceSpecAnnotation {
 	var annotations []ServiceSpecAnnotation
-	
+
 	for i := 0; i < len(lines); i++ {
 		line := strings.TrimSpace(lines[i])
-		
+
 		// Look for ServiceSpec annotation start
 		if bp.isServiceSpecStart(line) {
 			annotation, endLine := bp.parseServiceSpecAnnotation(lines, i, filepath)
@@ -166,7 +166,7 @@ func (bp *BaseFileParser) extractServiceSpecAnnotations(lines []string, filepath
 			}
 		}
 	}
-	
+
 	return annotations
 }
 
@@ -178,14 +178,14 @@ func (bp *BaseFileParser) isServiceSpecStart(line string) bool {
 		`\*\s*@ServiceSpec`,
 		`//\s*@ServiceSpec`,
 	}
-	
+
 	for _, pattern := range patterns {
 		matched, _ := regexp.MatchString(pattern, line)
 		if matched {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -194,7 +194,7 @@ func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine i
 	annotation := &ServiceSpecAnnotation{
 		StartLine: startLine + 1, // Convert to 1-based line numbers
 	}
-	
+
 	// Look backwards to find the start of the comment block
 	commentStart := startLine
 	for commentStart > 0 {
@@ -209,7 +209,7 @@ func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine i
 			break
 		}
 	}
-	
+
 	// Determine comment pattern from the actual comment start
 	pattern := bp.detectCommentPattern(lines[commentStart])
 	if pattern == nil {
@@ -220,24 +220,24 @@ func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine i
 			return nil, startLine
 		}
 	}
-	
+
 	// Extract annotation content starting from the comment start
 	content, endLine := bp.extractAnnotationContent(lines, commentStart, pattern)
 	annotation.EndLine = endLine + 1
-	
+
 	// Parse the content
 	if err := bp.parseAnnotationContent(content, annotation, filepath); err != nil {
 		bp.errorCollector.AddError(filepath, startLine+1, err.Error())
 		return nil, endLine
 	}
-	
+
 	return annotation, endLine
 }
 
 // detectCommentPattern determines which comment pattern is being used
 func (bp *BaseFileParser) detectCommentPattern(line string) *CommentPattern {
 	trimmedLine := strings.TrimSpace(line)
-	
+
 	// Check patterns in order of specificity (longer patterns first)
 	for _, pattern := range bp.commentPatterns {
 		if strings.Contains(trimmedLine, pattern.StartPattern) {
@@ -253,26 +253,26 @@ func (bp *BaseFileParser) detectCommentPattern(line string) *CommentPattern {
 func (bp *BaseFileParser) extractAnnotationContent(lines []string, startLine int, pattern *CommentPattern) (string, int) {
 	var content strings.Builder
 	currentLine := startLine
-	
+
 	if pattern.IsMultiLine {
 		// Multi-line comment (/* */ or /** */)
 		inAnnotation := false
-		
+
 		for currentLine < len(lines) {
 			line := lines[currentLine]
-			
+
 			if strings.Contains(line, "@ServiceSpec") {
 				inAnnotation = true
 				currentLine++
 				continue // Skip the @ServiceSpec line itself
 			}
-			
+
 			if inAnnotation {
 				// Check for end of comment first
 				if strings.Contains(line, pattern.EndPattern) {
 					break
 				}
-				
+
 				// Clean the line
 				cleaned := bp.cleanCommentLine(line, pattern)
 				if cleaned != "" {
@@ -280,28 +280,28 @@ func (bp *BaseFileParser) extractAnnotationContent(lines []string, startLine int
 					content.WriteString("\n")
 				}
 			}
-			
+
 			currentLine++
 		}
 	} else {
 		// Single-line comments (//)
 		foundServiceSpec := false
-		
+
 		for currentLine < len(lines) {
 			line := lines[currentLine]
 			trimmedLine := strings.TrimSpace(line)
-			
+
 			// Check if this line is still part of the comment
 			if !strings.HasPrefix(trimmedLine, strings.TrimSpace(pattern.StartPattern)) {
 				break
 			}
-			
+
 			if strings.Contains(line, "@ServiceSpec") {
 				foundServiceSpec = true
 				currentLine++
 				continue // Skip the @ServiceSpec line itself
 			}
-			
+
 			if foundServiceSpec {
 				cleaned := bp.cleanCommentLine(line, pattern)
 				if cleaned != "" {
@@ -309,29 +309,29 @@ func (bp *BaseFileParser) extractAnnotationContent(lines []string, startLine int
 					content.WriteString("\n")
 				}
 			}
-			
+
 			currentLine++
 		}
 		currentLine-- // Adjust for the last line that wasn't part of the comment
 	}
-	
+
 	return content.String(), currentLine
 }
 
 // cleanCommentLine removes comment markers from a line while preserving indentation
 func (bp *BaseFileParser) cleanCommentLine(line string, pattern *CommentPattern) string {
 	cleaned := line
-	
+
 	// Remove start pattern
 	if pattern.StartPattern != "" {
 		cleaned = strings.Replace(cleaned, pattern.StartPattern, "", 1)
 	}
-	
+
 	// Remove end pattern
 	if pattern.EndPattern != "" {
 		cleaned = strings.Replace(cleaned, pattern.EndPattern, "", 1)
 	}
-	
+
 	// For multi-line comments, remove the line prefix but preserve indentation after it
 	if pattern.IsMultiLine && pattern.LinePrefix != "" {
 		// Find the line prefix and remove it, but keep any indentation after it
@@ -364,10 +364,10 @@ func (bp *BaseFileParser) cleanCommentLine(line string, pattern *CommentPattern)
 			}
 		}
 	}
-	
+
 	// Remove @ServiceSpec marker if present
 	cleaned = regexp.MustCompile(`@ServiceSpec\s*`).ReplaceAllString(cleaned, "")
-	
+
 	// Don't trim the result to preserve indentation
 	return cleaned
 }
@@ -377,7 +377,7 @@ func (bp *BaseFileParser) parseAnnotationContent(content string, annotation *Ser
 	if content == "" {
 		return fmt.Errorf("empty ServiceSpec annotation")
 	}
-	
+
 	// Try to parse as YAML first (more flexible)
 	var data map[string]interface{}
 	if err := yaml.Unmarshal([]byte(content), &data); err != nil {
@@ -386,29 +386,29 @@ func (bp *BaseFileParser) parseAnnotationContent(content string, annotation *Ser
 			return fmt.Errorf("failed to parse annotation content as YAML or JSON: %s", err.Error())
 		}
 	}
-	
+
 	// Extract required fields
 	if operationID, ok := data["operationId"].(string); ok {
 		annotation.OperationID = operationID
 	} else {
 		return fmt.Errorf("missing or invalid operationId field")
 	}
-	
+
 	if description, ok := data["description"].(string); ok {
 		annotation.Description = description
 	} else {
 		return fmt.Errorf("missing or invalid description field")
 	}
-	
+
 	// Extract optional fields
 	if preconditions, ok := data["preconditions"]; ok {
 		annotation.Preconditions = preconditions
 	}
-	
+
 	if postconditions, ok := data["postconditions"]; ok {
 		annotation.Postconditions = postconditions
 	}
-	
+
 	return nil
 }
 
@@ -420,7 +420,7 @@ func (bp *BaseFileParser) convertAnnotationToSpec(annotation ServiceSpecAnnotati
 		SourceFile:  filepath,
 		LineNumber:  annotation.StartLine,
 	}
-	
+
 	// Convert preconditions to map[string]interface{}
 	if annotation.Preconditions != nil {
 		if preconditions, ok := annotation.Preconditions.(map[string]interface{}); ok {
@@ -431,7 +431,7 @@ func (bp *BaseFileParser) convertAnnotationToSpec(annotation ServiceSpecAnnotati
 	} else {
 		spec.Preconditions = make(map[string]interface{})
 	}
-	
+
 	// Convert postconditions to map[string]interface{}
 	if annotation.Postconditions != nil {
 		if postconditions, ok := annotation.Postconditions.(map[string]interface{}); ok {
@@ -442,19 +442,19 @@ func (bp *BaseFileParser) convertAnnotationToSpec(annotation ServiceSpecAnnotati
 	} else {
 		spec.Postconditions = make(map[string]interface{})
 	}
-	
+
 	// Validate the spec
 	if err := spec.Validate(); err != nil {
 		return spec, fmt.Errorf("invalid ServiceSpec: %s", err.Error())
 	}
-	
+
 	return spec, nil
 }
 
 // CanParse checks if this parser can handle the given file
 func (bp *BaseFileParser) CanParse(filename string) bool {
 	ext := strings.ToLower(filepath.Ext(filename))
-	
+
 	switch bp.language {
 	case LanguageJava:
 		return ext == ".java"
@@ -488,18 +488,18 @@ func (bp *BaseFileParser) ValidateJSONLogic(data interface{}) error {
 	if data == nil {
 		return nil // Empty conditions are allowed
 	}
-	
+
 	// Try to marshal and unmarshal to ensure it's valid JSON
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("invalid JSON structure: %s", err.Error())
 	}
-	
+
 	var result interface{}
 	if err := json.Unmarshal(jsonData, &result); err != nil {
 		return fmt.Errorf("invalid JSON structure: %s", err.Error())
 	}
-	
+
 	return nil
 }
 

@@ -71,10 +71,10 @@ func (e *ParseError) Error() string {
 
 // TraceData represents a complete trace with all its spans organized for efficient querying
 type TraceData struct {
-	TraceID   string             `json:"traceId"`
-	RootSpan  *Span             `json:"rootSpan"`
-	Spans     map[string]*Span  `json:"spans"`
-	SpanTree  *SpanNode         `json:"spanTree"`
+	TraceID  string           `json:"traceId"`
+	RootSpan *Span            `json:"rootSpan"`
+	Spans    map[string]*Span `json:"spans"`
+	SpanTree *SpanNode        `json:"spanTree"`
 }
 
 // Span represents a single span in an OpenTelemetry trace
@@ -83,8 +83,8 @@ type Span struct {
 	TraceID    string                 `json:"traceId"`
 	ParentID   string                 `json:"parentSpanId,omitempty"`
 	Name       string                 `json:"name"`
-	StartTime  int64                  `json:"startTime"`  // Unix timestamp in nanoseconds
-	EndTime    int64                  `json:"endTime"`    // Unix timestamp in nanoseconds
+	StartTime  int64                  `json:"startTime"` // Unix timestamp in nanoseconds
+	EndTime    int64                  `json:"endTime"`   // Unix timestamp in nanoseconds
 	Status     SpanStatus             `json:"status"`
 	Attributes map[string]interface{} `json:"attributes"`
 	Events     []SpanEvent            `json:"events"`
@@ -92,7 +92,7 @@ type Span struct {
 
 // SpanStatus represents the status of a span
 type SpanStatus struct {
-	Code    string `json:"code"`    // "OK", "ERROR", "TIMEOUT"
+	Code    string `json:"code"` // "OK", "ERROR", "TIMEOUT"
 	Message string `json:"message"`
 }
 
@@ -105,7 +105,7 @@ type SpanEvent struct {
 
 // SpanNode represents a node in the span tree structure
 type SpanNode struct {
-	Span     *Span      `json:"span"`
+	Span     *Span       `json:"span"`
 	Children []*SpanNode `json:"children"`
 }
 
@@ -251,41 +251,41 @@ type AlignmentReport struct {
 
 // AlignmentSummary provides summary statistics for the alignment report
 type AlignmentSummary struct {
-	Total              int     `json:"total"`
-	Success            int     `json:"success"`
-	Failed             int     `json:"failed"`
-	Skipped            int     `json:"skipped"`
-	SuccessRate        float64 `json:"successRate"`        // Success rate as percentage (0.0 to 1.0)
-	FailureRate        float64 `json:"failureRate"`        // Failure rate as percentage (0.0 to 1.0)
-	SkipRate           float64 `json:"skipRate"`           // Skip rate as percentage (0.0 to 1.0)
-	AverageExecutionTime int64 `json:"averageExecutionTime"` // Average execution time per spec in nanoseconds
-	TotalAssertions    int     `json:"totalAssertions"`    // Total number of assertions evaluated
-	FailedAssertions   int     `json:"failedAssertions"`   // Number of failed assertions
+	Total                int     `json:"total"`
+	Success              int     `json:"success"`
+	Failed               int     `json:"failed"`
+	Skipped              int     `json:"skipped"`
+	SuccessRate          float64 `json:"successRate"`          // Success rate as percentage (0.0 to 1.0)
+	FailureRate          float64 `json:"failureRate"`          // Failure rate as percentage (0.0 to 1.0)
+	SkipRate             float64 `json:"skipRate"`             // Skip rate as percentage (0.0 to 1.0)
+	AverageExecutionTime int64   `json:"averageExecutionTime"` // Average execution time per spec in nanoseconds
+	TotalAssertions      int     `json:"totalAssertions"`      // Total number of assertions evaluated
+	FailedAssertions     int     `json:"failedAssertions"`     // Number of failed assertions
 }
 
 // PerformanceInfo contains performance monitoring data
 type PerformanceInfo struct {
-	SpecsProcessed       int     `json:"specsProcessed"`       // Number of specs processed
-	SpansMatched         int     `json:"spansMatched"`         // Number of spans matched
-	AssertionsEvaluated  int     `json:"assertionsEvaluated"`  // Total assertions evaluated
-	ConcurrentWorkers    int     `json:"concurrentWorkers"`    // Number of concurrent workers used
-	MemoryUsageMB        float64 `json:"memoryUsageMB"`        // Peak memory usage in MB
-	ProcessingRate       float64 `json:"processingRate"`       // Specs processed per second
+	SpecsProcessed      int     `json:"specsProcessed"`      // Number of specs processed
+	SpansMatched        int     `json:"spansMatched"`        // Number of spans matched
+	AssertionsEvaluated int     `json:"assertionsEvaluated"` // Total assertions evaluated
+	ConcurrentWorkers   int     `json:"concurrentWorkers"`   // Number of concurrent workers used
+	MemoryUsageMB       float64 `json:"memoryUsageMB"`       // Peak memory usage in MB
+	ProcessingRate      float64 `json:"processingRate"`      // Specs processed per second
 }
 
 // AlignmentResult represents the result of aligning a single ServiceSpec with trace data
 type AlignmentResult struct {
-	SpecOperationID   string            `json:"specOperationId"`
-	Status            AlignmentStatus   `json:"status"`
-	Details           []ValidationDetail `json:"details"`
-	ExecutionTime     int64             `json:"executionTime"`     // Duration in nanoseconds
-	StartTime         int64             `json:"startTime"`         // Start timestamp in Unix nanoseconds
-	EndTime           int64             `json:"endTime"`           // End timestamp in Unix nanoseconds
-	MatchedSpans      []string          `json:"matchedSpans"`      // IDs of spans that matched this spec
-	AssertionsTotal   int               `json:"assertionsTotal"`   // Total number of assertions evaluated
-	AssertionsPassed  int               `json:"assertionsPassed"`  // Number of assertions that passed
-	AssertionsFailed  int               `json:"assertionsFailed"`  // Number of assertions that failed
-	ErrorMessage      string            `json:"errorMessage,omitempty"` // Error message if processing failed
+	SpecOperationID  string             `json:"specOperationId"`
+	Status           AlignmentStatus    `json:"status"`
+	Details          []ValidationDetail `json:"details"`
+	ExecutionTime    int64              `json:"executionTime"`          // Duration in nanoseconds
+	StartTime        int64              `json:"startTime"`              // Start timestamp in Unix nanoseconds
+	EndTime          int64              `json:"endTime"`                // End timestamp in Unix nanoseconds
+	MatchedSpans     []string           `json:"matchedSpans"`           // IDs of spans that matched this spec
+	AssertionsTotal  int                `json:"assertionsTotal"`        // Total number of assertions evaluated
+	AssertionsPassed int                `json:"assertionsPassed"`       // Number of assertions that passed
+	AssertionsFailed int                `json:"assertionsFailed"`       // Number of assertions that failed
+	ErrorMessage     string             `json:"errorMessage,omitempty"` // Error message if processing failed
 }
 
 // AlignmentStatus represents the status of an alignment result
@@ -299,7 +299,7 @@ const (
 
 // ValidationDetail provides detailed information about a specific validation
 type ValidationDetail struct {
-	Type          string                 `json:"type"`                    // "precondition" | "postcondition"
+	Type          string                 `json:"type"` // "precondition" | "postcondition"
 	Expression    string                 `json:"expression"`
 	Expected      interface{}            `json:"expected"`
 	Actual        interface{}            `json:"actual"`
@@ -335,18 +335,18 @@ func (ar *AlignmentReport) updateSummary() {
 		case StatusSkipped:
 			skipped++
 		}
-		
+
 		totalExecutionTime += result.ExecutionTime
 		totalAssertions += result.AssertionsTotal
 		failedAssertions += result.AssertionsFailed
 	}
 
 	ar.Summary = AlignmentSummary{
-		Total:           total,
-		Success:         success,
-		Failed:          failed,
-		Skipped:         skipped,
-		TotalAssertions: totalAssertions,
+		Total:            total,
+		Success:          success,
+		Failed:           failed,
+		Skipped:          skipped,
+		TotalAssertions:  totalAssertions,
 		FailedAssertions: failedAssertions,
 	}
 
@@ -398,7 +398,7 @@ func (as AlignmentStatus) IsValid() bool {
 // AddValidationDetail adds a validation detail to the alignment result
 func (ar *AlignmentResult) AddValidationDetail(detail ValidationDetail) {
 	ar.Details = append(ar.Details, detail)
-	
+
 	// Update status based on validation details
 	ar.updateStatus()
 }
@@ -423,9 +423,9 @@ func (ar *AlignmentResult) updateStatus() {
 		if detail.Type == "matching" {
 			continue
 		}
-		
+
 		totalAssertions++
-		
+
 		// Check if this assertion passed or failed
 		if detail.IsPassed() {
 			passedAssertions++

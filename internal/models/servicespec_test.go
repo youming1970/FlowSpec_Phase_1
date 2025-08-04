@@ -94,14 +94,14 @@ func TestServiceSpec_Validate(t *testing.T) {
 
 func TestServiceSpec_JSONSerialization(t *testing.T) {
 	spec := ServiceSpec{
-		OperationID:   "createUser",
-		Description:   "Create a new user",
+		OperationID: "createUser",
+		Description: "Create a new user",
 		Preconditions: map[string]interface{}{
-			"request.body.email": map[string]interface{}{"!=": nil},
+			"request.body.email":    map[string]interface{}{"!=": nil},
 			"request.body.password": map[string]interface{}{">=": 8},
 		},
 		Postconditions: map[string]interface{}{
-			"response.status": map[string]interface{}{"==": 201},
+			"response.status":      map[string]interface{}{"==": 201},
 			"response.body.userId": map[string]interface{}{"!=": nil},
 		},
 		SourceFile: "user.go",
@@ -130,7 +130,7 @@ func TestServiceSpec_JSONSerialization(t *testing.T) {
 	assert.Equal(t, spec.Description, newSpec.Description)
 	assert.Equal(t, spec.SourceFile, newSpec.SourceFile)
 	assert.Equal(t, spec.LineNumber, newSpec.LineNumber)
-	
+
 	// Note: JSON unmarshaling converts numbers to float64, so we need to check structure rather than exact equality
 	assert.NotNil(t, newSpec.Preconditions)
 	assert.NotNil(t, newSpec.Postconditions)
@@ -265,7 +265,7 @@ func TestServiceSpec_ComplexConditions(t *testing.T) {
 	err = newSpec.FromJSON(jsonData)
 	require.NoError(t, err)
 	assert.Equal(t, spec.OperationID, newSpec.OperationID)
-	
+
 	// Verify structure is preserved (JSON unmarshaling converts numbers to float64)
 	assert.NotNil(t, newSpec.Preconditions)
 	assert.NotNil(t, newSpec.Postconditions)
@@ -304,7 +304,7 @@ func TestSpan_HasError(t *testing.T) {
 func TestSpan_GetAttribute(t *testing.T) {
 	span := Span{
 		Attributes: map[string]interface{}{
-			"http.method": "POST",
+			"http.method":      "POST",
 			"http.status_code": 200,
 		},
 	}
@@ -900,7 +900,7 @@ func TestAlignmentReport_ComplexScenario(t *testing.T) {
 	report := NewAlignmentReport()
 
 	// Create multiple results with different outcomes
-	
+
 	// Successful operation
 	successResult := NewAlignmentResult("createUser")
 	successResult.ExecutionTime = 500000 // 0.5ms

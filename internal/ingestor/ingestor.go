@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"flowspec-cli/internal/models"
+	"github.com/flowspec/flowspec-cli/internal/models"
 )
 
 // TraceIngestor defines the interface for ingesting OpenTelemetry traces
@@ -31,11 +31,11 @@ type TraceQuery interface {
 
 // TraceStore provides storage and querying capabilities for trace data
 type TraceStore struct {
-	traceData    *models.TraceData
-	spanIndex    map[string]*models.Span           // spanID -> Span
-	nameIndex    map[string][]*models.Span         // span name -> Spans
-	operationIndex map[string][]*models.Span       // operation ID -> Spans
-	mu           sync.RWMutex
+	traceData      *models.TraceData
+	spanIndex      map[string]*models.Span   // spanID -> Span
+	nameIndex      map[string][]*models.Span // span name -> Spans
+	operationIndex map[string][]*models.Span // operation ID -> Spans
+	mu             sync.RWMutex
 }
 
 // DefaultTraceIngestor implements the TraceIngestor interface
@@ -47,23 +47,23 @@ type DefaultTraceIngestor struct {
 
 // IngestorConfig holds configuration for the trace ingestor
 type IngestorConfig struct {
-	MemoryLimitMB    int64 // Memory limit in MB
-	EnableStreaming  bool  // Enable streaming for large files
-	ChunkSize        int   // Chunk size for streaming
-	MaxFileSize      int64 // Maximum file size in bytes
-	EnableMetrics    bool  // Enable performance metrics
+	MemoryLimitMB   int64 // Memory limit in MB
+	EnableStreaming bool  // Enable streaming for large files
+	ChunkSize       int   // Chunk size for streaming
+	MaxFileSize     int64 // Maximum file size in bytes
+	EnableMetrics   bool  // Enable performance metrics
 }
 
 // IngestMetrics tracks ingestion performance
 type IngestMetrics struct {
-	StartTime       time.Time
-	EndTime         time.Time
-	TotalSpans      int
-	ProcessedSpans  int
-	MemoryUsed      int64
-	FileSize        int64
-	ProcessingTime  time.Duration
-	mu              sync.RWMutex
+	StartTime      time.Time
+	EndTime        time.Time
+	TotalSpans     int
+	ProcessedSpans int
+	MemoryUsed     int64
+	FileSize       int64
+	ProcessingTime time.Duration
+	mu             sync.RWMutex
 }
 
 // OTLPTrace represents the root structure of an OTLP JSON trace
@@ -73,8 +73,8 @@ type OTLPTrace struct {
 
 // ResourceSpan represents a resource span in OTLP format
 type ResourceSpan struct {
-	Resource    Resource    `json:"resource"`
-	ScopeSpans  []ScopeSpan `json:"scopeSpans"`
+	Resource   Resource    `json:"resource"`
+	ScopeSpans []ScopeSpan `json:"scopeSpans"`
 }
 
 // Resource represents a resource in OTLP format
@@ -84,8 +84,8 @@ type Resource struct {
 
 // ScopeSpan represents a scope span in OTLP format
 type ScopeSpan struct {
-	Scope Scope       `json:"scope"`
-	Spans []OTLPSpan  `json:"spans"`
+	Scope Scope      `json:"scope"`
+	Spans []OTLPSpan `json:"spans"`
 }
 
 // Scope represents a scope in OTLP format
@@ -100,12 +100,51 @@ type OTLPSpan struct {
 	SpanID            string      `json:"spanId"`
 	ParentSpanID      string      `json:"parentSpanId,omitempty"`
 	Name              string      `json:"name"`
-	Kind              int         `json:"kind"`
+	Kind              SpanKind    `json:"kind"`
 	StartTimeUnixNano string      `json:"startTimeUnixNano"`
 	EndTimeUnixNano   string      `json:"endTimeUnixNano"`
 	Attributes        []Attribute `json:"attributes"`
 	Status            Status      `json:"status"`
 	Events            []Event     `json:"events"`
+}
+
+// SpanKind represents the span kind that can be either string or int
+type SpanKind int
+
+// UnmarshalJSON implements custom unmarshaling for SpanKind
+func (sk *SpanKind) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as int first
+	var intVal int
+	if err := json.Unmarshal(data, &intVal); err == nil {
+		*sk = SpanKind(intVal)
+		return nil
+	}
+
+	// Try to unmarshal as string
+	var strVal string
+	if err := json.Unmarshal(data, &strVal); err != nil {
+		return err
+	}
+
+	// Convert string values to int
+	switch strVal {
+	case "SPAN_KIND_UNSPECIFIED":
+		*sk = 0
+	case "SPAN_KIND_INTERNAL":
+		*sk = 1
+	case "SPAN_KIND_SERVER":
+		*sk = 2
+	case "SPAN_KIND_CLIENT":
+		*sk = 3
+	case "SPAN_KIND_PRODUCER":
+		*sk = 4
+	case "SPAN_KIND_CONSUMER":
+		*sk = 5
+	default:
+		*sk = 0 // Default to unspecified
+	}
+
+	return nil
 }
 
 // Attribute represents an attribute in OTLP format
@@ -116,8 +155,41 @@ type Attribute struct {
 
 // Status represents span status in OTLP format
 type Status struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Code    StatusCode `json:"code"`
+	Message string     `json:"message"`
+}
+
+// StatusCode represents the status code that can be either string or int
+type StatusCode int
+
+// UnmarshalJSON implements custom unmarshaling for StatusCode
+func (sc *StatusCode) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as int first
+	var intVal int
+	if err := json.Unmarshal(data, &intVal); err == nil {
+		*sc = StatusCode(intVal)
+		return nil
+	}
+
+	// Try to unmarshal as string
+	var strVal string
+	if err := json.Unmarshal(data, &strVal); err != nil {
+		return err
+	}
+
+	// Convert string values to int
+	switch strVal {
+	case "STATUS_CODE_UNSET":
+		*sc = 0
+	case "STATUS_CODE_OK":
+		*sc = 1
+	case "STATUS_CODE_ERROR":
+		*sc = 2
+	default:
+		*sc = 0 // Default to unset
+	}
+
+	return nil
 }
 
 // Event represents a span event in OTLP format
@@ -132,7 +204,7 @@ func DefaultIngestorConfig() *IngestorConfig {
 	return &IngestorConfig{
 		MemoryLimitMB:   500, // 500MB default limit
 		EnableStreaming: true,
-		ChunkSize:       1024 * 1024, // 1MB chunks
+		ChunkSize:       1024 * 1024,       // 1MB chunks
 		MaxFileSize:     100 * 1024 * 1024, // 100MB max file size
 		EnableMetrics:   true,
 	}
@@ -176,19 +248,19 @@ func (ti *DefaultTraceIngestor) IngestFromFile(filePath string) (*models.TraceDa
 	if err != nil {
 		return nil, fmt.Errorf("failed to access file %s: %w", filePath, err)
 	}
-	
+
 	// Check file size limits
 	if fileInfo.Size() > 100*1024*1024 { // 100MB limit
 		return nil, fmt.Errorf("file size %d bytes exceeds maximum limit of 100MB", fileInfo.Size())
 	}
-	
+
 	// Open file
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file %s: %w", filePath, err)
 	}
 	defer file.Close()
-	
+
 	// Ingest from reader
 	return ti.IngestFromReader(file)
 }
@@ -197,42 +269,42 @@ func (ti *DefaultTraceIngestor) IngestFromFile(filePath string) (*models.TraceDa
 func (ti *DefaultTraceIngestor) IngestFromReader(reader io.Reader) (*models.TraceData, error) {
 	metrics := NewIngestMetrics()
 	defer metrics.Finish()
-	
+
 	// Check memory before starting
 	if err := ti.checkMemoryLimit(); err != nil {
 		return nil, err
 	}
-	
+
 	// Read and parse JSON
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read trace data: %w", err)
 	}
-	
+
 	// Update memory usage estimate
 	ti.updateMemoryUsage(int64(len(data)))
 	metrics.FileSize = int64(len(data))
-	
+
 	// Parse OTLP JSON
 	var otlpTrace OTLPTrace
 	if err := json.Unmarshal(data, &otlpTrace); err != nil {
 		return nil, fmt.Errorf("failed to parse OTLP JSON: %w", err)
 	}
-	
+
 	// Convert to internal format
 	traceData, err := ti.convertOTLPToTraceData(otlpTrace, metrics)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert OTLP data: %w", err)
 	}
-	
+
 	// Build span tree
 	if err := traceData.BuildSpanTree(); err != nil {
 		return nil, fmt.Errorf("failed to build span tree: %w", err)
 	}
-	
+
 	metrics.ProcessedSpans = len(traceData.Spans)
 	metrics.MemoryUsed = ti.GetMemoryUsage()
-	
+
 	return traceData, nil
 }
 
@@ -254,15 +326,15 @@ func (ti *DefaultTraceIngestor) GetMemoryUsage() int64 {
 func (ti *DefaultTraceIngestor) checkMemoryLimit() error {
 	ti.mu.RLock()
 	defer ti.mu.RUnlock()
-	
+
 	// Get current system memory usage
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	
+
 	if int64(m.Alloc) > ti.memoryLimit {
 		return fmt.Errorf("memory usage %d bytes exceeds limit %d bytes", m.Alloc, ti.memoryLimit)
 	}
-	
+
 	return nil
 }
 
@@ -278,11 +350,11 @@ func (ti *DefaultTraceIngestor) convertOTLPToTraceData(otlpTrace OTLPTrace, metr
 	if len(otlpTrace.ResourceSpans) == 0 {
 		return nil, fmt.Errorf("no resource spans found in trace data")
 	}
-	
+
 	traceData := &models.TraceData{
 		Spans: make(map[string]*models.Span),
 	}
-	
+
 	// Process all resource spans
 	for _, resourceSpan := range otlpTrace.ResourceSpans {
 		for _, scopeSpan := range resourceSpan.ScopeSpans {
@@ -291,23 +363,23 @@ func (ti *DefaultTraceIngestor) convertOTLPToTraceData(otlpTrace OTLPTrace, metr
 				if err != nil {
 					return nil, fmt.Errorf("failed to convert span %s: %w", otlpSpan.SpanID, err)
 				}
-				
+
 				// Set trace ID if not set
 				if traceData.TraceID == "" {
 					traceData.TraceID = span.TraceID
 				}
-				
+
 				// Add to spans map
 				traceData.Spans[span.SpanID] = span
 				metrics.TotalSpans++
 			}
 		}
 	}
-	
+
 	if len(traceData.Spans) == 0 {
 		return nil, fmt.Errorf("no spans found in trace data")
 	}
-	
+
 	return traceData, nil
 }
 
@@ -318,24 +390,24 @@ func (ti *DefaultTraceIngestor) convertOTLPSpan(otlpSpan OTLPSpan) (*models.Span
 	if err != nil {
 		return nil, fmt.Errorf("invalid start time: %w", err)
 	}
-	
+
 	endTime, err := parseNanoTimestamp(otlpSpan.EndTimeUnixNano)
 	if err != nil {
 		return nil, fmt.Errorf("invalid end time: %w", err)
 	}
-	
+
 	// Convert attributes
 	attributes := make(map[string]interface{})
 	for _, attr := range otlpSpan.Attributes {
 		attributes[attr.Key] = extractAttributeValue(attr.Value)
 	}
-	
+
 	// Convert status
 	status := models.SpanStatus{
 		Code:    convertStatusCode(otlpSpan.Status.Code),
 		Message: otlpSpan.Status.Message,
 	}
-	
+
 	// Convert events
 	var events []models.SpanEvent
 	for _, event := range otlpSpan.Events {
@@ -343,19 +415,19 @@ func (ti *DefaultTraceIngestor) convertOTLPSpan(otlpSpan OTLPSpan) (*models.Span
 		if err != nil {
 			continue // Skip invalid events
 		}
-		
+
 		eventAttrs := make(map[string]interface{})
 		for _, attr := range event.Attributes {
 			eventAttrs[attr.Key] = extractAttributeValue(attr.Value)
 		}
-		
+
 		events = append(events, models.SpanEvent{
 			Name:       event.Name,
 			Timestamp:  eventTime,
 			Attributes: eventAttrs,
 		})
 	}
-	
+
 	span := &models.Span{
 		SpanID:     otlpSpan.SpanID,
 		TraceID:    otlpSpan.TraceID,
@@ -367,7 +439,7 @@ func (ti *DefaultTraceIngestor) convertOTLPSpan(otlpSpan OTLPSpan) (*models.Span
 		Attributes: attributes,
 		Events:     events,
 	}
-	
+
 	return span, nil
 }
 
@@ -376,7 +448,7 @@ func parseNanoTimestamp(timestampStr string) (int64, error) {
 	if timestampStr == "" {
 		return 0, fmt.Errorf("empty timestamp")
 	}
-	
+
 	// Try to parse as int64 directly (nanoseconds since epoch)
 	var timestamp int64
 	n, err := fmt.Sscanf(timestampStr, "%d", &timestamp)
@@ -386,13 +458,13 @@ func parseNanoTimestamp(timestampStr string) (int64, error) {
 	if n != 1 {
 		return 0, fmt.Errorf("failed to parse timestamp %s: invalid format", timestampStr)
 	}
-	
+
 	// Validate that the entire string was consumed (no extra characters)
 	var extra string
 	if _, err := fmt.Sscanf(timestampStr, "%d%s", &timestamp, &extra); err == nil && extra != "" {
 		return 0, fmt.Errorf("failed to parse timestamp %s: contains non-numeric characters", timestampStr)
 	}
-	
+
 	return timestamp, nil
 }
 
@@ -401,7 +473,7 @@ func extractAttributeValue(value interface{}) interface{} {
 	if value == nil {
 		return nil
 	}
-	
+
 	// If it's already a simple value, return as-is
 	switch v := value.(type) {
 	case string, int, int64, float64, bool:
@@ -432,8 +504,8 @@ func extractAttributeValue(value interface{}) interface{} {
 }
 
 // convertStatusCode converts OTLP status code to string
-func convertStatusCode(code int) string {
-	switch code {
+func convertStatusCode(code StatusCode) string {
+	switch int(code) {
 	case 0:
 		return "UNSET"
 	case 1:
@@ -451,7 +523,7 @@ func convertStatusCode(code int) string {
 func (ts *TraceStore) SetTraceData(traceData *models.TraceData) {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
-	
+
 	ts.traceData = traceData
 	ts.buildIndexes()
 }
@@ -462,19 +534,19 @@ func (ts *TraceStore) buildIndexes() {
 	ts.spanIndex = make(map[string]*models.Span)
 	ts.nameIndex = make(map[string][]*models.Span)
 	ts.operationIndex = make(map[string][]*models.Span)
-	
+
 	if ts.traceData == nil {
 		return
 	}
-	
+
 	// Build indexes
 	for spanID, span := range ts.traceData.Spans {
 		// Span ID index
 		ts.spanIndex[spanID] = span
-		
+
 		// Name index
 		ts.nameIndex[span.Name] = append(ts.nameIndex[span.Name], span)
-		
+
 		// Operation ID index (from attributes)
 		if operationID, ok := span.Attributes["operation.id"].(string); ok {
 			ts.operationIndex[operationID] = append(ts.operationIndex[operationID], span)
@@ -507,7 +579,7 @@ func (ts *TraceStore) FindSpansByOperationID(operationID string) []*models.Span 
 func (ts *TraceStore) GetRootSpan() *models.Span {
 	ts.mu.RLock()
 	defer ts.mu.RUnlock()
-	
+
 	if ts.traceData != nil {
 		return ts.traceData.RootSpan
 	}
@@ -518,11 +590,11 @@ func (ts *TraceStore) GetRootSpan() *models.Span {
 func (ts *TraceStore) GetAllSpans() []*models.Span {
 	ts.mu.RLock()
 	defer ts.mu.RUnlock()
-	
+
 	if ts.traceData == nil {
 		return []*models.Span{}
 	}
-	
+
 	spans := make([]*models.Span, 0, len(ts.traceData.Spans))
 	for _, span := range ts.traceData.Spans {
 		spans = append(spans, span)
@@ -541,7 +613,7 @@ func (ts *TraceStore) GetTraceData() *models.TraceData {
 func (ts *TraceStore) GetSpanCount() int {
 	ts.mu.RLock()
 	defer ts.mu.RUnlock()
-	
+
 	if ts.traceData == nil {
 		return 0
 	}
@@ -562,7 +634,7 @@ func (im *IngestMetrics) Finish() {
 func (im *IngestMetrics) GetSummary() map[string]interface{} {
 	im.mu.RLock()
 	defer im.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"total_spans":      im.TotalSpans,
 		"processed_spans":  im.ProcessedSpans,
@@ -577,7 +649,7 @@ func (im *IngestMetrics) GetSummary() map[string]interface{} {
 func (im *IngestMetrics) GetProcessingRate() float64 {
 	im.mu.RLock()
 	defer im.mu.RUnlock()
-	
+
 	if im.ProcessingTime.Seconds() == 0 {
 		return 0
 	}

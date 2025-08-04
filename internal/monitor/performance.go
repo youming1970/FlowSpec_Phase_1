@@ -10,26 +10,26 @@ import (
 
 // PerformanceMonitor tracks performance metrics during CLI execution
 type PerformanceMonitor struct {
-	startTime      time.Time
-	metrics        map[string]interface{}
+	startTime       time.Time
+	metrics         map[string]interface{}
 	memoryPeakUsage uint64
-	memoryMutex    sync.RWMutex
-	stopChan       chan struct{}
-	isMonitoring   bool
-	monitorMutex   sync.Mutex
+	memoryMutex     sync.RWMutex
+	stopChan        chan struct{}
+	isMonitoring    bool
+	monitorMutex    sync.Mutex
 }
 
 // PerformanceMetrics contains collected performance data
 type PerformanceMetrics struct {
-	ExecutionTime    time.Duration              `json:"execution_time"`
-	PeakMemoryUsage  uint64                     `json:"peak_memory_usage_bytes"`
-	PeakMemoryMB     float64                    `json:"peak_memory_usage_mb"`
-	InitialMemory    uint64                     `json:"initial_memory_bytes"`
-	FinalMemory      uint64                     `json:"final_memory_bytes"`
-	GCStats          runtime.MemStats           `json:"gc_stats"`
-	CustomMetrics    map[string]interface{}     `json:"custom_metrics"`
-	Timestamps       map[string]time.Time       `json:"timestamps"`
-	Durations        map[string]time.Duration   `json:"durations"`
+	ExecutionTime   time.Duration            `json:"execution_time"`
+	PeakMemoryUsage uint64                   `json:"peak_memory_usage_bytes"`
+	PeakMemoryMB    float64                  `json:"peak_memory_usage_mb"`
+	InitialMemory   uint64                   `json:"initial_memory_bytes"`
+	FinalMemory     uint64                   `json:"final_memory_bytes"`
+	GCStats         runtime.MemStats         `json:"gc_stats"`
+	CustomMetrics   map[string]interface{}   `json:"custom_metrics"`
+	Timestamps      map[string]time.Time     `json:"timestamps"`
+	Durations       map[string]time.Duration `json:"durations"`
 }
 
 // NewPerformanceMonitor creates a new performance monitor
@@ -44,25 +44,25 @@ func NewPerformanceMonitor() *PerformanceMonitor {
 func (pm *PerformanceMonitor) Start() {
 	pm.monitorMutex.Lock()
 	defer pm.monitorMutex.Unlock()
-	
+
 	if pm.isMonitoring {
 		return
 	}
-	
+
 	pm.startTime = time.Now()
 	pm.isMonitoring = true
 	pm.stopChan = make(chan struct{})
-	
+
 	// Record initial memory usage
 	var initialMem runtime.MemStats
 	runtime.ReadMemStats(&initialMem)
 	pm.memoryMutex.Lock()
 	pm.memoryPeakUsage = initialMem.Alloc
 	pm.memoryMutex.Unlock()
-	
+
 	pm.metrics["initial_memory"] = initialMem.Alloc
 	pm.metrics["start_time"] = pm.startTime
-	
+
 	// Start memory monitoring goroutine
 	go pm.monitorMemory()
 }
@@ -71,32 +71,32 @@ func (pm *PerformanceMonitor) Start() {
 func (pm *PerformanceMonitor) Stop() *PerformanceMetrics {
 	pm.monitorMutex.Lock()
 	defer pm.monitorMutex.Unlock()
-	
+
 	if !pm.isMonitoring {
 		return nil
 	}
-	
+
 	// Stop monitoring
 	if pm.stopChan != nil {
 		close(pm.stopChan)
 		pm.stopChan = nil
 	}
 	pm.isMonitoring = false
-	
+
 	// Record final metrics
 	endTime := time.Now()
 	executionTime := endTime.Sub(pm.startTime)
-	
+
 	var finalMem runtime.MemStats
 	runtime.ReadMemStats(&finalMem)
-	
+
 	var gcStats runtime.MemStats
 	runtime.ReadMemStats(&gcStats)
-	
+
 	pm.memoryMutex.RLock()
 	peakMemory := pm.memoryPeakUsage
 	pm.memoryMutex.RUnlock()
-	
+
 	// Create metrics object
 	metrics := &PerformanceMetrics{
 		ExecutionTime:   executionTime,
@@ -109,7 +109,7 @@ func (pm *PerformanceMonitor) Stop() *PerformanceMetrics {
 		Timestamps:      make(map[string]time.Time),
 		Durations:       make(map[string]time.Duration),
 	}
-	
+
 	// Copy custom metrics
 	for k, v := range pm.metrics {
 		if k != "initial_memory" && k != "start_time" {
@@ -123,7 +123,7 @@ func (pm *PerformanceMonitor) Stop() *PerformanceMetrics {
 			}
 		}
 	}
-	
+
 	return metrics
 }
 
@@ -131,7 +131,7 @@ func (pm *PerformanceMonitor) Stop() *PerformanceMetrics {
 func (pm *PerformanceMonitor) RecordMetric(key string, value interface{}) {
 	pm.monitorMutex.Lock()
 	defer pm.monitorMutex.Unlock()
-	
+
 	pm.metrics[key] = value
 }
 
@@ -175,7 +175,7 @@ func (pm *PerformanceMonitor) ForceGC() {
 func (pm *PerformanceMonitor) monitorMemory() {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-pm.stopChan:
@@ -183,7 +183,7 @@ func (pm *PerformanceMonitor) monitorMemory() {
 		case <-ticker.C:
 			var m runtime.MemStats
 			runtime.ReadMemStats(&m)
-			
+
 			pm.memoryMutex.Lock()
 			if m.Alloc > pm.memoryPeakUsage {
 				pm.memoryPeakUsage = m.Alloc
@@ -197,13 +197,13 @@ func (pm *PerformanceMonitor) monitorMemory() {
 func (pm *PerformanceMonitor) TimedOperation(name string, operation func() error) error {
 	start := time.Now()
 	pm.RecordTimestamp(name + "_start")
-	
+
 	err := operation()
-	
+
 	duration := time.Since(start)
 	pm.RecordTimestamp(name + "_end")
 	pm.RecordDuration(name, duration)
-	
+
 	return err
 }
 
@@ -211,13 +211,13 @@ func (pm *PerformanceMonitor) TimedOperation(name string, operation func() error
 func (pm *PerformanceMonitor) TimedOperationWithContext(ctx context.Context, name string, operation func(context.Context) error) error {
 	start := time.Now()
 	pm.RecordTimestamp(name + "_start")
-	
+
 	err := operation(ctx)
-	
+
 	duration := time.Since(start)
 	pm.RecordTimestamp(name + "_end")
 	pm.RecordDuration(name, duration)
-	
+
 	return err
 }
 
@@ -235,7 +235,7 @@ func (pm *PerformanceMonitor) PrintSummary(metrics *PerformanceMetrics) {
 		fmt.Println("No performance metrics available")
 		return
 	}
-	
+
 	fmt.Println("Performance Summary:")
 	fmt.Println("===================")
 	fmt.Printf("Execution Time: %s\n", metrics.ExecutionTime)
@@ -245,14 +245,14 @@ func (pm *PerformanceMonitor) PrintSummary(metrics *PerformanceMetrics) {
 	fmt.Printf("Memory Growth: %.2f MB\n", float64(metrics.FinalMemory-metrics.InitialMemory)/(1024*1024))
 	fmt.Printf("GC Runs: %d\n", metrics.GCStats.NumGC)
 	fmt.Printf("GC Pause Total: %s\n", time.Duration(metrics.GCStats.PauseTotalNs))
-	
+
 	if len(metrics.Durations) > 0 {
 		fmt.Println("\nOperation Durations:")
 		for name, duration := range metrics.Durations {
 			fmt.Printf("  %s: %s\n", name, duration)
 		}
 	}
-	
+
 	if len(metrics.CustomMetrics) > 0 {
 		fmt.Println("\nCustom Metrics:")
 		for name, value := range metrics.CustomMetrics {
@@ -311,23 +311,23 @@ func (rm *ResourceMonitor) Stop() (*PerformanceMetrics, []string) {
 	if metrics == nil {
 		return nil, []string{"Failed to collect performance metrics"}
 	}
-	
+
 	var violations []string
-	
+
 	// Check memory limit
 	if rm.limits.MaxMemoryMB > 0 && metrics.PeakMemoryMB > rm.limits.MaxMemoryMB {
 		violations = append(violations, fmt.Sprintf(
 			"Memory limit exceeded: %.2f MB > %.2f MB",
 			metrics.PeakMemoryMB, rm.limits.MaxMemoryMB))
 	}
-	
+
 	// Check duration limit
 	if rm.limits.MaxDuration > 0 && metrics.ExecutionTime > rm.limits.MaxDuration {
 		violations = append(violations, fmt.Sprintf(
 			"Duration limit exceeded: %s > %s",
 			metrics.ExecutionTime, rm.limits.MaxDuration))
 	}
-	
+
 	// Check GC pause limit
 	gcPauseTotal := time.Duration(metrics.GCStats.PauseTotalNs)
 	if rm.limits.MaxGCPauseTotal > 0 && gcPauseTotal > rm.limits.MaxGCPauseTotal {
@@ -335,7 +335,7 @@ func (rm *ResourceMonitor) Stop() (*PerformanceMetrics, []string) {
 			"GC pause limit exceeded: %s > %s",
 			gcPauseTotal, rm.limits.MaxGCPauseTotal))
 	}
-	
+
 	return metrics, violations
 }
 

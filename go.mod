@@ -1,4 +1,4 @@
-module flowspec-cli
+module github.com/flowspec/flowspec-cli
 
 go 1.21
 

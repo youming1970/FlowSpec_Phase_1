@@ -142,7 +142,7 @@ func (evaluator *JSONLogicEvaluator) buildEvaluationData(context *EvaluationCont
 	// Add span data if available
 	if context.Span != nil {
 		span := context.Span
-		
+
 		// Span basic information
 		data["span"] = map[string]interface{}{
 			"id":         span.SpanID,
@@ -340,7 +340,7 @@ func (evaluator *JSONLogicEvaluator) validateOperatorsRecursive(obj interface{},
 					return fmt.Errorf("operator '%s' is not allowed", key)
 				}
 			}
-			
+
 			// Recursively validate nested objects
 			if err := evaluator.validateOperatorsRecursive(value, allowedOps); err != nil {
 				return err
@@ -353,7 +353,7 @@ func (evaluator *JSONLogicEvaluator) validateOperatorsRecursive(obj interface{},
 			}
 		}
 	}
-	
+
 	return nil
 }
 

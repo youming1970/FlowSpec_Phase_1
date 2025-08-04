@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"flowspec-cli/internal/models"
+	"github.com/flowspec/flowspec-cli/internal/models"
 )
 
 // GoFileParser implements FileParser for Go source files

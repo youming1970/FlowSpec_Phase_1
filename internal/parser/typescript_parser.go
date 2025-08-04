@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"flowspec-cli/internal/models"
+	"github.com/flowspec/flowspec-cli/internal/models"
 )
 
 // TypeScriptFileParser implements FileParser for TypeScript source files

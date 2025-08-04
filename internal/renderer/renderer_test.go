@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"flowspec-cli/internal/models"
+	"github.com/flowspec/flowspec-cli/internal/models"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +15,7 @@ import (
 
 func TestNewReportRenderer(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	assert.NotNil(t, renderer)
 	assert.NotNil(t, renderer.config)
 	assert.True(t, renderer.config.ShowTimestamps)
@@ -31,9 +31,9 @@ func TestNewReportRendererWithConfig(t *testing.T) {
 		ShowDetailedErrors: false,
 		ColorOutput:        false,
 	}
-	
+
 	renderer := NewReportRendererWithConfig(config)
-	
+
 	assert.NotNil(t, renderer)
 	assert.Equal(t, config, renderer.config)
 	assert.False(t, renderer.config.ShowTimestamps)
@@ -48,9 +48,9 @@ func TestRenderHuman_EmptyReport(t *testing.T) {
 	config.ColorOutput = false
 	renderer := NewReportRendererWithConfig(config)
 	report := models.NewAlignmentReport()
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, "FlowSpec 验证报告")
 	assert.Contains(t, output, "总计: 0 个 ServiceSpec")
@@ -68,9 +68,9 @@ func TestRenderHuman_SuccessfulReport(t *testing.T) {
 		models.StatusSuccess,
 		models.StatusSuccess,
 	})
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, "总计: 2 个 ServiceSpec")
 	assert.Contains(t, output, "成功: 2 个")
@@ -88,9 +88,9 @@ func TestRenderHuman_FailedReport(t *testing.T) {
 		models.StatusSuccess,
 		models.StatusFailed,
 	})
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, "总计: 2 个 ServiceSpec")
 	assert.Contains(t, output, "成功: 1 个")
@@ -108,9 +108,9 @@ func TestRenderHuman_MixedReport(t *testing.T) {
 		models.StatusFailed,
 		models.StatusSkipped,
 	})
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, "总计: 3 个 ServiceSpec")
 	assert.Contains(t, output, "成功: 1 个")
@@ -127,7 +127,7 @@ func TestRenderHuman_WithPerformanceMetrics(t *testing.T) {
 	config.ColorOutput = false
 	renderer := NewReportRendererWithConfig(config)
 	report := createTestReport(t, []models.AlignmentStatus{models.StatusSuccess})
-	
+
 	// Add performance metrics
 	report.PerformanceInfo = models.PerformanceInfo{
 		SpecsProcessed:      1,
@@ -136,9 +136,9 @@ func TestRenderHuman_WithPerformanceMetrics(t *testing.T) {
 		ConcurrentWorkers:   4,
 		AssertionsEvaluated: 1, // Match the test report which has 1 assertion
 	}
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, "性能指标")
 	assert.Contains(t, output, "处理速度: 10.50 specs/秒")
@@ -151,11 +151,11 @@ func TestRenderHuman_WithoutColors(t *testing.T) {
 	config := DefaultRendererConfig()
 	config.ColorOutput = false
 	renderer := NewReportRendererWithConfig(config)
-	
+
 	report := createTestReport(t, []models.AlignmentStatus{models.StatusFailed})
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	// Should not contain ANSI color codes
 	assert.NotContains(t, output, "\033[")
@@ -169,11 +169,11 @@ func TestRenderHuman_DetailedErrors(t *testing.T) {
 	config.ColorOutput = false
 	renderer := NewReportRendererWithConfig(config)
 	report := models.NewAlignmentReport()
-	
+
 	// Create a result with detailed validation errors
 	result := models.NewAlignmentResult("test-operation")
 	result.Status = models.StatusFailed
-	
+
 	// Add a failed validation detail
 	detail := models.ValidationDetail{
 		Type:          "postcondition",
@@ -191,12 +191,12 @@ func TestRenderHuman_DetailedErrors(t *testing.T) {
 			},
 		},
 	}
-	
+
 	result.AddValidationDetail(detail)
 	report.AddResult(*result)
-	
+
 	output, err := renderer.RenderHuman(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, "Response status check failed")
 	assert.Contains(t, output, "期望: 200")
@@ -214,20 +214,20 @@ func TestRenderJSON(t *testing.T) {
 		models.StatusSuccess,
 		models.StatusFailed,
 	})
-	
+
 	output, err := renderer.RenderJSON(report)
-	
+
 	require.NoError(t, err)
 	assert.Contains(t, output, `"summary"`)
 	assert.Contains(t, output, `"results"`)
 	assert.Contains(t, output, `"total": 2`)
 	assert.Contains(t, output, `"success": 1`)
 	assert.Contains(t, output, `"failed": 1`)
-	
+
 	// Verify it's valid JSON by checking structure
 	assert.True(t, strings.HasPrefix(strings.TrimSpace(output), "{"))
 	assert.True(t, strings.HasSuffix(strings.TrimSpace(output), "}"))
-	
+
 	// Verify JSON can be unmarshaled back to a report
 	var unmarshaledReport models.AlignmentReport
 	err = json.Unmarshal([]byte(output), &unmarshaledReport)
@@ -239,9 +239,9 @@ func TestRenderJSON(t *testing.T) {
 
 func TestRenderJSON_NilReport(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	output, err := renderer.RenderJSON(nil)
-	
+
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "report cannot be nil")
 	assert.Empty(t, output)
@@ -250,17 +250,17 @@ func TestRenderJSON_NilReport(t *testing.T) {
 func TestRenderJSON_InvalidReport(t *testing.T) {
 	renderer := NewReportRenderer()
 	report := models.NewAlignmentReport()
-	
+
 	// Create an invalid report with inconsistent summary
 	result := models.NewAlignmentResult("test-op")
 	result.Status = models.StatusSuccess
 	report.AddResult(*result)
-	
+
 	// Manually corrupt the summary to make it inconsistent
 	report.Summary.Total = 999 // Wrong total
-	
+
 	output, err := renderer.RenderJSON(report)
-	
+
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "report validation failed")
 	assert.Empty(t, output)
@@ -268,12 +268,12 @@ func TestRenderJSON_InvalidReport(t *testing.T) {
 
 func TestValidateJSONOutput(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	// Create a valid report and render it to get properly formatted JSON
 	validReport := models.NewAlignmentReport()
 	validJSON, err := renderer.RenderJSON(validReport)
 	require.NoError(t, err)
-	
+
 	tests := []struct {
 		name        string
 		jsonOutput  string
@@ -308,7 +308,7 @@ func TestValidateJSONOutput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := renderer.ValidateJSONOutput(tt.jsonOutput)
-			
+
 			if tt.expectError {
 				assert.Error(t, err)
 				if tt.errorMsg != "" {
@@ -323,16 +323,16 @@ func TestValidateJSONOutput(t *testing.T) {
 
 func TestGetJSONSchema(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	schema := renderer.GetJSONSchema()
-	
+
 	assert.NotEmpty(t, schema)
 	assert.Contains(t, schema, `"$schema"`)
 	assert.Contains(t, schema, `"title": "FlowSpec Alignment Report"`)
 	assert.Contains(t, schema, `"properties"`)
 	assert.Contains(t, schema, `"summary"`)
 	assert.Contains(t, schema, `"results"`)
-	
+
 	// Verify it's valid JSON
 	var schemaObj interface{}
 	err := json.Unmarshal([]byte(schema), &schemaObj)
@@ -342,7 +342,7 @@ func TestGetJSONSchema(t *testing.T) {
 func TestRenderJSONWithSchema(t *testing.T) {
 	renderer := NewReportRenderer()
 	report := createTestReport(t, []models.AlignmentStatus{models.StatusSuccess})
-	
+
 	tests := []struct {
 		name          string
 		includeSchema bool
@@ -363,10 +363,10 @@ func TestRenderJSONWithSchema(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			output, err := renderer.RenderJSONWithSchema(report, tt.includeSchema)
-			
+
 			require.NoError(t, err)
 			assert.NotEmpty(t, output)
-			
+
 			if tt.expectSchema {
 				assert.Contains(t, output, `"$schema"`)
 				assert.Contains(t, output, `"report"`)
@@ -374,7 +374,7 @@ func TestRenderJSONWithSchema(t *testing.T) {
 				assert.NotContains(t, output, `"$schema"`)
 				assert.Contains(t, output, `"summary"`)
 			}
-			
+
 			// Verify it's valid JSON
 			var jsonObj interface{}
 			err = json.Unmarshal([]byte(output), &jsonObj)
@@ -390,23 +390,23 @@ func TestJSONFormatConsistency(t *testing.T) {
 		models.StatusFailed,
 		models.StatusSkipped,
 	})
-	
+
 	output, err := renderer.RenderJSON(report)
 	require.NoError(t, err)
-	
+
 	// Verify JSON is properly formatted (multi-line)
 	lines := strings.Split(output, "\n")
 	assert.True(t, len(lines) > 1, "JSON should be multi-line formatted")
-	
+
 	// Verify the JSON validates against our own validation
 	err = renderer.ValidateJSONOutput(output)
 	assert.NoError(t, err)
-	
+
 	// Verify JSON can be parsed and re-marshaled
 	var testReport models.AlignmentReport
 	err = json.Unmarshal([]byte(output), &testReport)
 	require.NoError(t, err)
-	
+
 	// Verify the unmarshaled report has the same key data
 	assert.Equal(t, report.Summary.Total, testReport.Summary.Total)
 	assert.Equal(t, len(report.Results), len(testReport.Results))
@@ -414,7 +414,7 @@ func TestJSONFormatConsistency(t *testing.T) {
 
 func TestGetExitCode(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	tests := []struct {
 		name     string
 		report   *models.AlignmentReport
@@ -460,17 +460,17 @@ func TestGetColor(t *testing.T) {
 	config := DefaultRendererConfig()
 	config.ColorOutput = true
 	renderer := NewReportRendererWithConfig(config)
-	
+
 	assert.Equal(t, "\033[0m", renderer.getColor("reset"))
 	assert.Equal(t, "\033[1m", renderer.getColor("bold"))
 	assert.Equal(t, "\033[31m", renderer.getColor("red"))
 	assert.Equal(t, "\033[32m", renderer.getColor("green"))
 	assert.Equal(t, "", renderer.getColor("nonexistent"))
-	
+
 	// Test with colors disabled
 	config.ColorOutput = false
 	renderer = NewReportRendererWithConfig(config)
-	
+
 	assert.Equal(t, "", renderer.getColor("reset"))
 	assert.Equal(t, "", renderer.getColor("red"))
 	assert.Equal(t, "", renderer.getColor("green"))
@@ -478,7 +478,7 @@ func TestGetColor(t *testing.T) {
 
 func TestGetStatusColor(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	assert.Equal(t, "\033[32m", renderer.getStatusColor(models.StatusSuccess))
 	assert.Equal(t, "\033[31m", renderer.getStatusColor(models.StatusFailed))
 	assert.Equal(t, "\033[33m", renderer.getStatusColor(models.StatusSkipped))
@@ -487,7 +487,7 @@ func TestGetStatusColor(t *testing.T) {
 
 func TestGetStatusIcon(t *testing.T) {
 	renderer := NewReportRenderer()
-	
+
 	assert.Equal(t, "✅", renderer.getStatusIcon(models.StatusSuccess))
 	assert.Equal(t, "❌", renderer.getStatusIcon(models.StatusFailed))
 	assert.Equal(t, "⏭️", renderer.getStatusIcon(models.StatusSkipped))
@@ -500,13 +500,13 @@ func createTestReport(t *testing.T, statuses []models.AlignmentStatus) *models.A
 	report.ExecutionTime = int64(time.Second)
 	report.StartTime = time.Now().UnixNano()
 	report.EndTime = report.StartTime + report.ExecutionTime
-	
+
 	for i, status := range statuses {
 		result := models.NewAlignmentResult(fmt.Sprintf("operation-%d", i+1))
 		result.Status = status
 		result.ExecutionTime = int64(100 * time.Millisecond)
 		result.MatchedSpans = []string{fmt.Sprintf("span-%d", i+1)}
-		
+
 		// Add some validation details based on status
 		switch status {
 		case models.StatusSuccess:
@@ -529,9 +529,9 @@ func createTestReport(t *testing.T, statuses []models.AlignmentStatus) *models.A
 		case models.StatusSkipped:
 			// No validation details for skipped
 		}
-		
+
 		report.AddResult(*result)
 	}
-	
+
 	return report
 }
