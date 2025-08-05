@@ -330,10 +330,10 @@ uname -a
 
 如果这里没有找到您问题的答案，请：
 
-1. 查看 [API 文档](API.md)
-2. 查看 [架构文档](ARCHITECTURE.md)
-3. 在 [GitHub Issues](../../issues) 中搜索
-4. 在 [GitHub Discussions](../../discussions) 中提问
+1. 查看 [API 文档](./API.md)
+2. 查看 [架构文档](./ARCHITECTURE.md)
+3. 在 [GitHub Issues](https://github.com/FlowSpec/flowspec-cli/issues) 中搜索
+4. 在 [GitHub Discussions](https://github.com/FlowSpec/flowspec-cli/discussions) 中提问
 5. 发送邮件到 youming@flowspec.org
 
 ---

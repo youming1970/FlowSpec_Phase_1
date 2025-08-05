@@ -18,7 +18,6 @@ import (
 type BaseFileParser struct {
 	language        SupportedLanguage
 	commentPatterns []CommentPattern
-	errorCollector  *ErrorCollector
 }
 
 // CommentPattern defines how comments are structured in different languages
@@ -44,7 +43,6 @@ func NewBaseFileParser(language SupportedLanguage) *BaseFileParser {
 	return &BaseFileParser{
 		language:        language,
 		commentPatterns: getCommentPatterns(language),
-		errorCollector:  NewErrorCollector(),
 	}
 }
 
@@ -109,12 +107,12 @@ func getCommentPatterns(language SupportedLanguage) []CommentPattern {
 
 // ParseFile parses a file and extracts ServiceSpec annotations
 func (bp *BaseFileParser) ParseFile(filepath string) ([]models.ServiceSpec, []models.ParseError) {
-	bp.errorCollector.Clear()
+	errorCollector := NewErrorCollector()
 
 	file, err := os.Open(filepath)
 	if err != nil {
-		bp.errorCollector.AddError(filepath, 0, fmt.Sprintf("failed to open file: %s", err.Error()))
-		return []models.ServiceSpec{}, bp.errorCollector.GetErrors()
+		errorCollector.AddError(filepath, 0, fmt.Sprintf("failed to open file: %s", err.Error()))
+		return []models.ServiceSpec{}, errorCollector.GetErrors()
 	}
 	defer file.Close()
 
@@ -126,29 +124,29 @@ func (bp *BaseFileParser) ParseFile(filepath string) ([]models.ServiceSpec, []mo
 	}
 
 	if err := scanner.Err(); err != nil {
-		bp.errorCollector.AddError(filepath, 0, fmt.Sprintf("failed to read file: %s", err.Error()))
-		return []models.ServiceSpec{}, bp.errorCollector.GetErrors()
+		errorCollector.AddError(filepath, 0, fmt.Sprintf("failed to read file: %s", err.Error()))
+		return []models.ServiceSpec{}, errorCollector.GetErrors()
 	}
 
 	// Extract ServiceSpec annotations
-	annotations := bp.extractServiceSpecAnnotations(lines, filepath)
+	annotations := bp.extractServiceSpecAnnotations(lines, filepath, errorCollector)
 
 	// Convert annotations to ServiceSpec objects
 	var specs []models.ServiceSpec
 	for _, annotation := range annotations {
 		spec, err := bp.convertAnnotationToSpec(annotation, filepath)
 		if err != nil {
-			bp.errorCollector.AddError(filepath, annotation.StartLine, err.Error())
+			errorCollector.AddError(filepath, annotation.StartLine, err.Error())
 			continue
 		}
 		specs = append(specs, spec)
 	}
 
-	return specs, bp.errorCollector.GetErrors()
+	return specs, errorCollector.GetErrors()
 }
 
 // extractServiceSpecAnnotations finds and extracts ServiceSpec annotations from file lines
-func (bp *BaseFileParser) extractServiceSpecAnnotations(lines []string, filepath string) []ServiceSpecAnnotation {
+func (bp *BaseFileParser) extractServiceSpecAnnotations(lines []string, filepath string, errorCollector *ErrorCollector) []ServiceSpecAnnotation {
 	var annotations []ServiceSpecAnnotation
 
 	for i := 0; i < len(lines); i++ {
@@ -156,7 +154,7 @@ func (bp *BaseFileParser) extractServiceSpecAnnotations(lines []string, filepath
 
 		// Look for ServiceSpec annotation start
 		if bp.isServiceSpecStart(line) {
-			annotation, endLine := bp.parseServiceSpecAnnotation(lines, i, filepath)
+			annotation, endLine := bp.parseServiceSpecAnnotation(lines, i, filepath, errorCollector)
 			if annotation != nil {
 				annotations = append(annotations, *annotation)
 			}
@@ -190,7 +188,7 @@ func (bp *BaseFileParser) isServiceSpecStart(line string) bool {
 }
 
 // parseServiceSpecAnnotation parses a complete ServiceSpec annotation
-func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine int, filepath string) (*ServiceSpecAnnotation, int) {
+func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine int, filepath string, errorCollector *ErrorCollector) (*ServiceSpecAnnotation, int) {
 	annotation := &ServiceSpecAnnotation{
 		StartLine: startLine + 1, // Convert to 1-based line numbers
 	}
@@ -216,7 +214,7 @@ func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine i
 		// Try to detect from the current line
 		pattern = bp.detectCommentPattern(lines[startLine])
 		if pattern == nil {
-			bp.errorCollector.AddError(filepath, startLine+1, "unable to detect comment pattern")
+			errorCollector.AddError(filepath, startLine+1, "unable to detect comment pattern")
 			return nil, startLine
 		}
 	}
@@ -227,7 +225,7 @@ func (bp *BaseFileParser) parseServiceSpecAnnotation(lines []string, startLine i
 
 	// Parse the content
 	if err := bp.parseAnnotationContent(content, annotation, filepath); err != nil {
-		bp.errorCollector.AddError(filepath, startLine+1, err.Error())
+		errorCollector.AddError(filepath, startLine+1, err.Error())
 		return nil, endLine
 	}
 
@@ -354,7 +352,7 @@ func (bp *BaseFileParser) cleanCommentLine(line string, pattern *CommentPattern)
 					remaining = remaining[1:]
 				}
 				// Preserve the original indentation structure for YAML
-				leadingSpaces := len(cleaned) - len(strings.TrimLeft(cleaned, " \t"))
+				leadingSpaces := len(cleaned) - len(strings.TrimLeft(cleaned, " 	"))
 				if leadingSpaces > 0 && remaining != "" {
 					// Keep some indentation for YAML structure
 					cleaned = strings.Repeat(" ", max(0, leadingSpaces-2)) + remaining
@@ -470,16 +468,6 @@ func (bp *BaseFileParser) CanParse(filename string) bool {
 // GetLanguage returns the language this parser handles
 func (bp *BaseFileParser) GetLanguage() SupportedLanguage {
 	return bp.language
-}
-
-// GetErrorCount returns the number of errors collected during parsing
-func (bp *BaseFileParser) GetErrorCount() int {
-	return bp.errorCollector.Count()
-}
-
-// ClearErrors clears all collected errors
-func (bp *BaseFileParser) ClearErrors() {
-	bp.errorCollector.Clear()
 }
 
 // ValidateJSONLogic validates that the given data can be processed by JSONLogic

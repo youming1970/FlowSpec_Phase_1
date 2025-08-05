@@ -147,7 +147,6 @@ flowspec-cli/
 │   ├── engine/          # Alignment validation engine
 │   ├── renderer/        # Report renderer
 │   └── models/          # Data models
-├── pkg/                 # Public packages (can be used externally)
 ├── testdata/            # Test data files
 ├── scripts/             # Build and test scripts
 └── docs/                # Project documentation
@@ -303,7 +302,7 @@ go test -run TestMemoryUsage ./cmd/flowspec-cli/ -timeout 30m
 - Use clear and concise language.
 - Provide practical code examples.
 - Keep documentation in sync with code updates.
-- Support both Chinese and English (Chinese preferred).
+- Maintain parity between English and Chinese documentation.
 
 ## Pull Request Guide
 
@@ -359,7 +358,32 @@ All PRs require a code review:
 
 ## Release Process
 
-### Versioning Specification
+### Workflow Overview
+
+- **Daily Development**: Contributors should use `make` targets (`make quality`, `make test`, etc.) for daily development and testing.
+- **Release Preparation**: Creating a new release is a standardized process managed by a dedicated script.
+
+### Creating a Release (for Maintainers)
+
+Maintainers should use the `prepare-release.sh` script to create a new release. This script automates all the necessary steps to ensure a consistent and reliable release.
+
+```bash
+# Usage: ./scripts/prepare-release.sh [VERSION]
+# Example for version 1.0.0
+./scripts/prepare-release.sh 1.0.0
+```
+
+The script will:
+1.  Run prerequisite checks (clean git status, correct branch, etc.).
+2.  Update the version in `version.go` and `CHANGELOG.md`.
+3.  Run all CI checks (`make ci`) to ensure quality.
+4.  Build and package all release binaries (`make package`).
+5.  Create a final git commit and tag for the release.
+6.  Provide instructions for publishing the release on GitHub.
+
+This approach ensures that every release is built and tagged in a uniform way, minimizing human error.
+
+## Versioning Specification
 
 We use [Semantic Versioning](https://semver.org/):
 
@@ -367,14 +391,6 @@ We use [Semantic Versioning](https://semver.org/):
 - `MAJOR`: Incompatible API changes
 - `MINOR`: Backward-compatible functionality additions
 - `PATCH`: Backward-compatible bug fixes
-
-### Release Checklist
-
-- [ ] All tests pass
-- [ ] Documentation is updated
-- [ ] Changelog is updated
-- [ ] Version number is updated
-- [ ] Performance benchmarks pass
 
 ## Community Code of Conduct
 

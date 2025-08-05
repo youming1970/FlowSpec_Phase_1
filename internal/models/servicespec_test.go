@@ -452,9 +452,11 @@ func TestTraceData_BuildSpanTree_NoSpans(t *testing.T) {
 		Spans:   map[string]*Span{},
 	}
 
+	// Building a tree from no spans should not produce an error.
 	err := traceData.BuildSpanTree()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "no spans available")
+	assert.NoError(t, err)
+	assert.Nil(t, traceData.RootSpan, "RootSpan should be nil for an empty trace")
+	assert.Nil(t, traceData.SpanTree, "SpanTree should be nil for an empty trace")
 }
 
 func TestTraceData_BuildSpanTree_NoRootSpan(t *testing.T) {

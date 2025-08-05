@@ -347,12 +347,13 @@ func (ti *DefaultTraceIngestor) updateMemoryUsage(additionalBytes int64) {
 
 // convertOTLPToTraceData converts OTLP format to internal TraceData format
 func (ti *DefaultTraceIngestor) convertOTLPToTraceData(otlpTrace OTLPTrace, metrics *IngestMetrics) (*models.TraceData, error) {
-	if len(otlpTrace.ResourceSpans) == 0 {
-		return nil, fmt.Errorf("no resource spans found in trace data")
-	}
-
 	traceData := &models.TraceData{
 		Spans: make(map[string]*models.Span),
+	}
+
+	// An empty ResourceSpans is valid, just means no data.
+	if len(otlpTrace.ResourceSpans) == 0 {
+		return traceData, nil
 	}
 
 	// Process all resource spans
@@ -361,6 +362,8 @@ func (ti *DefaultTraceIngestor) convertOTLPToTraceData(otlpTrace OTLPTrace, metr
 			for _, otlpSpan := range scopeSpan.Spans {
 				span, err := ti.convertOTLPSpan(otlpSpan)
 				if err != nil {
+					// Log or collect errors for spans that fail to convert?
+					// For now, we fail the entire ingestion.
 					return nil, fmt.Errorf("failed to convert span %s: %w", otlpSpan.SpanID, err)
 				}
 
@@ -374,10 +377,6 @@ func (ti *DefaultTraceIngestor) convertOTLPToTraceData(otlpTrace OTLPTrace, metr
 				metrics.TotalSpans++
 			}
 		}
-	}
-
-	if len(traceData.Spans) == 0 {
-		return nil, fmt.Errorf("no spans found in trace data")
 	}
 
 	return traceData, nil

@@ -101,14 +101,19 @@ func TestIngestFromReader_InvalidJSON(t *testing.T) {
 func TestIngestFromReader_EmptyTrace(t *testing.T) {
 	ingestor := NewTraceIngestor()
 
+	// An OTLP trace with an empty resourceSpans array is valid.
 	emptyTrace := `{"resourceSpans": []}`
 	reader := strings.NewReader(emptyTrace)
 
 	traceData, err := ingestor.IngestFromReader(reader)
 
-	assert.Error(t, err)
-	assert.Nil(t, traceData)
-	assert.Contains(t, err.Error(), "no resource spans found")
+	// It should not produce an error.
+	require.NoError(t, err)
+	// It should return a valid, non-nil TraceData object.
+	require.NotNil(t, traceData)
+	// The TraceData object should contain no spans.
+	assert.Len(t, traceData.Spans, 0)
+	assert.Nil(t, traceData.RootSpan)
 }
 
 func TestIngestFromFile_ValidFile(t *testing.T) {

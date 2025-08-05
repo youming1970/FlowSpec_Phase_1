@@ -1,271 +1,271 @@
-# FlowSpec CLI API Documentation
+# FlowSpec CLI API 文档
 
-This document describes the core API interfaces and data structures of the FlowSpec CLI.
+本文档描述了 FlowSpec CLI 的核心 API 接口和数据结构。
 
-## Table of Contents
+## 目录
 
-- [Core Interfaces](#core-interfaces)
-- [Data Models](#data-models)
-- [Error Handling](#error-handling)
-- [Usage Examples](#usage-examples)
+- [核心接口](#核心接口)
+- [数据模型](#数据模型)
+- [错误处理](#错误处理)
+- [使用示例](#使用示例)
 
-## Core Interfaces
+## 核心接口
 
-### SpecParser Interface
+### SpecParser 接口
 
-The ServiceSpec parser interface, used to extract and parse ServiceSpec annotations from source code.
+ServiceSpec 解析器接口，用于从源代码中提取和解析 ServiceSpec 注解。
 
 ```go
 type SpecParser interface {
-    // ParseFromSource parses ServiceSpec annotations from the specified source code directory.
-    // sourcePath: The path to the source code directory.
-    // Returns: The parsing result and an error.
+    // ParseFromSource 从指定的源代码目录解析 ServiceSpec 注解
+    // sourcePath: 源代码目录路径
+    // 返回: 解析结果和错误信息
     ParseFromSource(sourcePath string) (*ParseResult, error)
 }
 
 type FileParser interface {
-    // CanParse checks if the specified file can be parsed.
+    // CanParse 检查是否可以解析指定文件
     CanParse(filename string) bool
     
-    // ParseFile parses ServiceSpec annotations from a single file.
+    // ParseFile 解析单个文件中的 ServiceSpec 注解
     ParseFile(filepath string) ([]ServiceSpec, []ParseError)
 }
 ```
 
-#### Implementations
+#### 实现类
 
-- `JavaParser`: Parses `@ServiceSpec` annotations from Java files.
-- `TypeScriptParser`: Parses `@ServiceSpec` comments from TypeScript files.
-- `GoParser`: Parses `@ServiceSpec` comments from Go files.
+- `JavaParser`: 解析 Java 文件中的 `@ServiceSpec` 注解
+- `TypeScriptParser`: 解析 TypeScript 文件中的 `@ServiceSpec` 注释
+- `GoParser`: 解析 Go 文件中的 `@ServiceSpec` 注释
 
-### TraceIngestor Interface
+### TraceIngestor 接口
 
-The OpenTelemetry trace data ingestor interface.
+OpenTelemetry 轨迹数据摄取器接口。
 
 ```go
 type TraceIngestor interface {
-    // IngestFromFile ingests trace data from a file.
-    // tracePath: The path to the trace file.
-    // Returns: A trace store object and an error.
+    // IngestFromFile 从文件中摄取轨迹数据
+    // tracePath: 轨迹文件路径
+    // 返回: 轨迹存储对象和错误信息
     IngestFromFile(tracePath string) (*TraceStore, error)
 }
 
 type TraceQuery interface {
-    // FindSpanByName finds a span by trace name and span name.
+    // FindSpanByName 根据轨迹名称和 Span 名称查找 Span
     FindSpanByName(traceName string, spanName string) (*Span, error)
     
-    // FindSpansByOperationId finds all related spans by operation ID.
+    // FindSpansByOperationId 根据操作 ID 查找所有相关 Span
     FindSpansByOperationId(operationId string) ([]*Span, error)
     
-    // GetTraceByID gets the full trace data by trace ID.
+    // GetTraceByID 根据轨迹 ID 获取完整轨迹数据
     GetTraceByID(traceId string) (*TraceData, error)
 }
 ```
 
-### AlignmentEngine Interface
+### AlignmentEngine 接口
 
-The specification and trace alignment validation engine interface.
+规约与轨迹对齐验证引擎接口。
 
 ```go
 type AlignmentEngine interface {
-    // Align performs alignment validation between specifications and traces.
-    // specs: A list of ServiceSpecs.
-    // traceQuery: The trace query interface.
-    // Returns: An alignment report and an error.
+    // Align 执行规约与轨迹的对齐验证
+    // specs: ServiceSpec 列表
+    // traceQuery: 轨迹查询接口
+    // 返回: 对齐报告和错误信息
     Align(specs []ServiceSpec, traceQuery TraceQuery) (*AlignmentReport, error)
 }
 
 type AssertionEvaluator interface {
-    // EvaluatePreconditions evaluates preconditions.
+    // EvaluatePreconditions 评估前置条件
     EvaluatePreconditions(spec ServiceSpec, span *Span) ([]ValidationDetail, error)
     
-    // EvaluatePostconditions evaluates postconditions.
+    // EvaluatePostconditions 评估后置条件
     EvaluatePostconditions(spec ServiceSpec, span *Span) ([]ValidationDetail, error)
 }
 ```
 
-### ReportRenderer Interface
+### ReportRenderer 接口
 
-The report renderer interface.
+报告渲染器接口。
 
 ```go
 type ReportRenderer interface {
-    // RenderHuman renders a report in human-readable format.
+    // RenderHuman 渲染人类可读格式的报告
     RenderHuman(report *AlignmentReport) (string, error)
     
-    // RenderJSON renders a report in JSON format.
+    // RenderJSON 渲染 JSON 格式的报告
     RenderJSON(report *AlignmentReport) (string, error)
     
-    // GetExitCode gets the exit code based on the report result.
+    // GetExitCode 根据报告结果获取退出码
     GetExitCode(report *AlignmentReport) int
 }
 ```
 
-## Data Models
+## 数据模型
 
 ### ServiceSpec
 
-`ServiceSpec` represents a service specification parsed from the source code.
+ServiceSpec 表示从源代码中解析出的服务规约。
 
 ```go
 type ServiceSpec struct {
-    // OperationID is the identifier for the operation, used to match with trace data.
+    // OperationID 操作标识符，用于与轨迹数据匹配
     OperationID string `json:"operationId"`
     
-    // Description is the description of the operation.
+    // Description 操作描述
     Description string `json:"description"`
     
-    // Preconditions are the preconditions in JSONLogic format.
+    // Preconditions 前置条件，使用 JSONLogic 格式
     Preconditions map[string]interface{} `json:"preconditions"`
     
-    // Postconditions are the postconditions in JSONLogic format.
+    // Postconditions 后置条件，使用 JSONLogic 格式
     Postconditions map[string]interface{} `json:"postconditions"`
     
-    // SourceFile is the path to the source file.
+    // SourceFile 源文件路径
     SourceFile string `json:"sourceFile"`
     
-    // LineNumber is the line number in the source file.
+    // LineNumber 在源文件中的行号
     LineNumber int `json:"lineNumber"`
 }
 ```
 
 ### ParseResult
 
-`ParseResult` contains successfully parsed ServiceSpecs and parsing errors.
+解析结果包含成功解析的 ServiceSpec 和解析错误。
 
 ```go
 type ParseResult struct {
-    // Specs is a list of successfully parsed ServiceSpecs.
+    // Specs 成功解析的 ServiceSpec 列表
     Specs []ServiceSpec `json:"specs"`
     
-    // Errors is a list of errors encountered during parsing.
+    // Errors 解析过程中遇到的错误列表
     Errors []ParseError `json:"errors"`
 }
 
 type ParseError struct {
-    // File is the path to the file where the error occurred.
+    // File 出错的文件路径
     File string `json:"file"`
     
-    // Line is the line number where the error occurred.
+    // Line 出错的行号
     Line int `json:"line"`
     
-    // Message is the error message.
+    // Message 错误信息
     Message string `json:"message"`
 }
 ```
 
 ### TraceData
 
-`TraceData` represents a complete distributed trace.
+轨迹数据表示一个完整的分布式轨迹。
 
 ```go
 type TraceData struct {
-    // TraceID is the unique identifier for the trace.
+    // TraceID 轨迹唯一标识符
     TraceID string `json:"traceId"`
     
-    // RootSpan is the root span.
+    // RootSpan 根 Span
     RootSpan *Span `json:"rootSpan"`
     
-    // Spans is a map of all spans (SpanID -> Span).
+    // Spans 所有 Span 的映射表 (SpanID -> Span)
     Spans map[string]*Span `json:"spans"`
     
-    // SpanTree is the tree structure of the spans.
+    // SpanTree Span 的树形结构
     SpanTree *SpanNode `json:"spanTree"`
 }
 ```
 
 ### Span
 
-`Span` represents an operational unit in a distributed trace.
+Span 表示分布式轨迹中的一个操作单元。
 
 ```go
 type Span struct {
-    // SpanID is the unique identifier for the span.
+    // SpanID Span 唯一标识符
     SpanID string `json:"spanId"`
     
-    // TraceID is the identifier of the trace it belongs to.
+    // TraceID 所属轨迹的标识符
     TraceID string `json:"traceId"`
     
-    // ParentID is the identifier of the parent span.
+    // ParentID 父 Span 的标识符
     ParentID string `json:"parentSpanId,omitempty"`
     
-    // Name is the name of the span.
+    // Name Span 名称
     Name string `json:"name"`
     
-    // StartTime is the start time.
+    // StartTime 开始时间
     StartTime time.Time `json:"startTime"`
     
-    // EndTime is the end time.
+    // EndTime 结束时间
     EndTime time.Time `json:"endTime"`
     
-    // Status is the status of the span.
+    // Status Span 状态
     Status SpanStatus `json:"status"`
     
-    // Attributes are the attributes of the span.
+    // Attributes Span 属性
     Attributes map[string]interface{} `json:"attributes"`
     
-    // Events is a list of events for the span.
+    // Events Span 事件列表
     Events []SpanEvent `json:"events"`
 }
 
 type SpanStatus struct {
-    // Code is the status code ("OK", "ERROR", "TIMEOUT").
+    // Code 状态码 ("OK", "ERROR", "TIMEOUT")
     Code string `json:"code"`
     
-    // Message is the status message.
+    // Message 状态消息
     Message string `json:"message"`
 }
 
 type SpanEvent struct {
-    // Name is the name of the event.
+    // Name 事件名称
     Name string `json:"name"`
     
-    // Timestamp is the timestamp of the event.
+    // Timestamp 事件时间戳
     Timestamp time.Time `json:"timestamp"`
     
-    // Attributes are the attributes of the event.
+    // Attributes 事件属性
     Attributes map[string]interface{} `json:"attributes"`
 }
 ```
 
 ### AlignmentReport
 
-`AlignmentReport` contains a summary and detailed information of the validation results.
+对齐报告包含验证结果的汇总和详细信息。
 
 ```go
 type AlignmentReport struct {
-    // Summary is the summary statistics.
+    // Summary 汇总统计信息
     Summary AlignmentSummary `json:"summary"`
     
-    // Results is a list of detailed validation results.
+    // Results 详细验证结果列表
     Results []AlignmentResult `json:"results"`
 }
 
 type AlignmentSummary struct {
-    // Total is the total number of ServiceSpecs.
+    // Total 总的 ServiceSpec 数量
     Total int `json:"total"`
     
-    // Success is the number of successful validations.
+    // Success 验证成功的数量
     Success int `json:"success"`
     
-    // Failed is the number of failed validations.
+    // Failed 验证失败的数量
     Failed int `json:"failed"`
     
-    // Skipped is the number of skipped validations.
+    // Skipped 跳过验证的数量
     Skipped int `json:"skipped"`
 }
 
 type AlignmentResult struct {
-    // SpecOperationID is the operation ID of the ServiceSpec.
+    // SpecOperationID ServiceSpec 的操作 ID
     SpecOperationID string `json:"specOperationId"`
     
-    // Status is the validation status.
+    // Status 验证状态
     Status AlignmentStatus `json:"status"`
     
-    // Details is a list of validation details.
+    // Details 验证详情列表
     Details []ValidationDetail `json:"details"`
     
-    // ExecutionTime is the execution time.
+    // ExecutionTime 执行时间
     ExecutionTime time.Duration `json:"executionTime"`
 }
 
@@ -278,52 +278,52 @@ const (
 )
 
 type ValidationDetail struct {
-    // Type is the validation type ("precondition" | "postcondition").
+    // Type 验证类型 ("precondition" | "postcondition")
     Type string `json:"type"`
     
-    // Expression is the assertion expression.
+    // Expression 断言表达式
     Expression string `json:"expression"`
     
-    // Expected is the expected value.
+    // Expected 期望值
     Expected interface{} `json:"expected"`
     
-    // Actual is the actual value.
+    // Actual 实际值
     Actual interface{} `json:"actual"`
     
-    // Message is the validation message.
+    // Message 验证消息
     Message string `json:"message"`
     
-    // SpanContext is the related span context.
+    // SpanContext 相关的 Span 上下文
     SpanContext *Span `json:"spanContext,omitempty"`
 }
 ```
 
-## Error Handling
+## 错误处理
 
-### Error Types
+### 错误类型
 
-The FlowSpec CLI defines the following error types:
+FlowSpec CLI 定义了以下错误类型：
 
 ```go
-// ErrInvalidInput indicates invalid input parameters.
+// ErrInvalidInput 输入参数无效
 var ErrInvalidInput = errors.New("invalid input")
 
-// ErrFileNotFound indicates that a file was not found.
+// ErrFileNotFound 文件未找到
 var ErrFileNotFound = errors.New("file not found")
 
-// ErrParseError indicates a parsing error.
+// ErrParseError 解析错误
 var ErrParseError = errors.New("parse error")
 
-// ErrValidationFailed indicates a validation failure.
+// ErrValidationFailed 验证失败
 var ErrValidationFailed = errors.New("validation failed")
 
-// ErrResourceLimit indicates a resource limit was exceeded.
+// ErrResourceLimit 资源限制
 var ErrResourceLimit = errors.New("resource limit exceeded")
 ```
 
-### Error Wrapping
+### 错误包装
 
-Use `fmt.Errorf` to wrap errors to provide more context:
+使用 `fmt.Errorf` 包装错误以提供更多上下文：
 
 ```go
 func (p *SpecParser) parseFile(filepath string) error {
@@ -332,23 +332,25 @@ func (p *SpecParser) parseFile(filepath string) error {
         return fmt.Errorf("failed to read file %s: %w", filepath, err)
     }
     
-    // ... parsing logic
+    // ... 解析逻辑
     
     return nil
 }
 ```
 
-### Exit Codes
+### 退出码
 
-The CLI tool uses the following exit codes:
+CLI 工具使用以下退出码：
 
-- `0`: Successful execution
-- `1`: Validation failed (assertions did not pass)
-- `2`: System error (file not found, parse error, etc.)
+- `0`: 成功执行
+- `1`: 验证失败（断言不通过）
+- `2`: 系统错误（文件不存在、解析错误等）
 
-## Usage Examples
+## 使用示例
 
-### Basic Usage
+### 概念性用法
+
+此示例演示了使用核心组件的概念性工作流程。请注意，无法从外部代码直接导入 `internal` 包；这仅用于说明目的。
 
 ```go
 package main
@@ -356,7 +358,10 @@ package main
 import (
     "fmt"
     "log"
+    "os"
     
+    // 注意：这些是内部包，不能被外部直接导入。
+    // 此示例仅用于说明组件之间的交互方式。
     "github.com/FlowSpec/flowspec-cli/internal/parser"
     "github.com/FlowSpec/flowspec-cli/internal/ingestor"
     "github.com/FlowSpec/flowspec-cli/internal/engine"
@@ -364,47 +369,47 @@ import (
 )
 
 func main() {
-    // 1. Parse ServiceSpecs
+    // 1. 创建 ServiceSpec 解析器并从目录中解析规约
     specParser := parser.NewSpecParser()
     parseResult, err := specParser.ParseFromSource("./my-project")
     if err != nil {
-        log.Fatalf("Failed to parse ServiceSpecs: %v", err)
+        log.Fatalf("解析 ServiceSpec 失败: %v", err)
     }
     
-    // 2. Ingest trace data
+    // 2. 摄取 OpenTelemetry 轨迹文件
     traceIngestor := ingestor.NewTraceIngestor()
     traceStore, err := traceIngestor.IngestFromFile("./traces/run-1.json")
     if err != nil {
-        log.Fatalf("Failed to ingest trace data: %v", err)
+        log.Fatalf("摄取轨迹数据失败: %v", err)
     }
     
-    // 3. Perform alignment validation
+    // 3. 创建对齐引擎并执行验证
     alignmentEngine := engine.NewAlignmentEngine()
     report, err := alignmentEngine.Align(parseResult.Specs, traceStore)
     if err != nil {
-        log.Fatalf("Failed to perform alignment: %v", err)
+        log.Fatalf("执行对齐失败: %v", err)
     }
     
-    // 4. Render the report
+    // 4. 创建报告渲染器并显示结果
     reportRenderer := renderer.NewReportRenderer()
     humanReport, err := reportRenderer.RenderHuman(report)
     if err != nil {
-        log.Fatalf("Failed to render report: %v", err)
+        log.Fatalf("渲染报告失败: %v", err)
     }
     
     fmt.Println(humanReport)
     
-    // 5. Get the exit code
+    // 5. 根据报告确定退出码
     exitCode := reportRenderer.GetExitCode(report)
     os.Exit(exitCode)
 }
 ```
 
-### Custom Parser
+### 自定义解析器
 
 ```go
 type CustomParser struct {
-    // Custom parser implementation
+    // 自定义解析器实现
 }
 
 func (p *CustomParser) CanParse(filename string) bool {
@@ -412,16 +417,16 @@ func (p *CustomParser) CanParse(filename string) bool {
 }
 
 func (p *CustomParser) ParseFile(filepath string) ([]ServiceSpec, []ParseError) {
-    // Custom parsing logic
+    // 自定义解析逻辑
     return specs, errors
 }
 
-// Register the custom parser
+// 注册自定义解析器
 specParser := parser.NewSpecParser()
 specParser.RegisterFileParser(&CustomParser{})
 ```
 
-### JSONLogic Assertion Example
+### JSONLogic 断言示例
 
 ```json
 {
@@ -447,9 +452,9 @@ specParser.RegisterFileParser(&CustomParser{})
 }
 ```
 
-### Evaluation Context
+### 评估上下文
 
-The evaluation context for JSONLogic expressions contains the following variables:
+JSONLogic 表达式的评估上下文包含以下变量：
 
 ```json
 {
@@ -480,24 +485,24 @@ The evaluation context for JSONLogic expressions contains the following variable
 }
 ```
 
-## Performance Considerations
+## 性能考虑
 
-### Memory Optimization
+### 内存优化
 
-- Use stream parsing to handle large files.
-- Implement an object pool to reduce GC pressure.
-- Provide memory usage monitoring and limits.
+- 使用流式解析处理大文件
+- 实现对象池复用减少 GC 压力
+- 提供内存使用监控和限制
 
-### Query Optimization
+### 查询优化
 
-- Build an index on span names.
-- Implement an operation ID map.
-- Use a time range index to speed up queries.
+- 构建 Span 名称索引
+- 实现操作 ID 映射表
+- 使用时间范围索引加速查询
 
-### Concurrency Safety
+### 并发安全
 
-All public interfaces are thread-safe and can be used safely in a multi-goroutine environment.
+所有公共接口都是线程安全的，可以在多 goroutine 环境中安全使用。
 
 ---
 
-For more details, please refer to the comments and test cases in the source code.
+更多详细信息请参考源代码中的注释和测试用例。

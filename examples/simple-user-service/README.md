@@ -21,12 +21,8 @@ simple-user-service/
 │   ├── success-scenario.json
 │   ├── precondition-failure.json
 │   └── postcondition-failure.json
-├── scripts/
-│   └── generate-traces.sh
 └── expected-results/
-    ├── success-report.json
-    ├── precondition-failure-report.json
-    └── postcondition-failure-report.json
+    └── success-report.json
 ```
 
 ## ServiceSpec Annotation Examples
@@ -240,4 +236,4 @@ flowspec-cli align --path=./src --trace=./traces/success-scenario.json --log-lev
 
 ---
 
-This example provides you with the basic usage of the FlowSpec CLI. After mastering these concepts, you can proceed to learn from more complex example projects.
+This example provides you with the basic usage of the FlowSpec CLI.

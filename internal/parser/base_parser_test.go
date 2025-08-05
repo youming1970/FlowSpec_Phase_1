@@ -15,7 +15,6 @@ func TestNewBaseFileParser(t *testing.T) {
 	assert.NotNil(t, parser)
 	assert.Equal(t, LanguageJava, parser.language)
 	assert.NotNil(t, parser.commentPatterns)
-	assert.NotNil(t, parser.errorCollector)
 	assert.Len(t, parser.commentPatterns, 2) // Java has /** */ and /* */ patterns
 }
 
@@ -463,18 +462,6 @@ func TestParseFile_EmptyFile(t *testing.T) {
 
 	assert.Empty(t, specs)
 	assert.Empty(t, errors)
-}
-
-func TestErrorCollectorMethods(t *testing.T) {
-	parser := NewBaseFileParser(LanguageJava)
-
-	assert.Equal(t, 0, parser.GetErrorCount())
-
-	parser.errorCollector.AddError("test.java", 1, "test error")
-	assert.Equal(t, 1, parser.GetErrorCount())
-
-	parser.ClearErrors()
-	assert.Equal(t, 0, parser.GetErrorCount())
 }
 
 func TestGetLanguage(t *testing.T) {

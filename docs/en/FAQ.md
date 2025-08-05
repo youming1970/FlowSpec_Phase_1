@@ -330,10 +330,10 @@ uname -a
 
 If you can't find the answer to your question here, please:
 
-1.  Check the [API Documentation](API.md)
-2.  Check the [Architecture Document](ARCHITECTURE.md)
-3.  Search in [GitHub Issues](../../issues)
-4.  Ask in [GitHub Discussions](../../discussions)
+1.  Check the [API Documentation](./API.md)
+2.  Check the [Architecture Document](./ARCHITECTURE.md)
+3.  Search in [GitHub Issues](https://github.com/FlowSpec/flowspec-cli/issues)
+4.  Ask in [GitHub Discussions](https://github.com/FlowSpec/flowspec-cli/discussions)
 5.  Email us at youming@flowspec.org
 
 ---

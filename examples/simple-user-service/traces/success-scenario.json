@@ -107,7 +107,7 @@
             {"key": "http.url", "value": {"stringValue": "/api/users/12345"}},
             {"key": "http.status_code", "value": {"intValue": 204}},
             {"key": "request.params.userId", "value": {"stringValue": "12345"}},
-            {"key": "response.body", "value": {"stringValue": ""}}
+            {"key": "response.body", "value": null}
           ]
         }
       ]

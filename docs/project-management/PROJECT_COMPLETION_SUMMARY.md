@@ -83,7 +83,7 @@
 ### Release Materials
 - ✅ **Release Notes** (RELEASE_NOTES_v1.0.0.md)
 - ✅ **License File** (LICENSE - Apache-2.0)
-- ✅ **Release Script** (scripts/prepare-release.sh)
+- ✅ **Release Command** (`make release-prepare`)
 
 ## 🎯 Acceptance Criteria Achievement Status
 

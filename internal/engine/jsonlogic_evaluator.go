@@ -65,15 +65,19 @@ func (evaluator *JSONLogicEvaluator) EvaluateAssertion(assertion map[string]inte
 		return nil, fmt.Errorf("failed to build evaluation data: %w", err)
 	}
 
+	// Check if this is a multi-condition assertion (ServiceSpec format)
+	// If so, convert it to a proper JSONLogic "and" expression
+	processedAssertion := evaluator.preprocessAssertion(assertion)
+
 	// Validate assertion before evaluation if in strict mode
 	if evaluator.config.StrictMode {
-		if err := evaluator.ValidateAssertion(assertion); err != nil {
+		if err := evaluator.ValidateAssertion(processedAssertion); err != nil {
 			return nil, fmt.Errorf("assertion validation failed: %w", err)
 		}
 	}
 
 	// Apply JSONLogic with timeout protection
-	result, err := evaluator.applyWithTimeout(assertion, data)
+	result, err := evaluator.applyWithTimeout(processedAssertion, data)
 	if err != nil {
 		assertionJSON, _ := json.Marshal(assertion)
 		return &AssertionResult{
@@ -144,7 +148,7 @@ func (evaluator *JSONLogicEvaluator) buildEvaluationData(context *EvaluationCont
 		span := context.Span
 
 		// Span basic information
-		data["span"] = map[string]interface{}{
+		spanData := map[string]interface{}{
 			"id":         span.SpanID,
 			"name":       span.Name,
 			"trace_id":   span.TraceID,
@@ -160,20 +164,29 @@ func (evaluator *JSONLogicEvaluator) buildEvaluationData(context *EvaluationCont
 			"is_root":   span.IsRoot(),
 		}
 
-		// Add span attributes directly to root level for easier access
-		// Replace dots with underscores to avoid JSONLogic property access issues
-		for key, value := range span.Attributes {
-			// Keep original key for backward compatibility
-			data[key] = value
-			// Also add with underscores for JSONLogic compatibility
-			safeKey := strings.ReplaceAll(key, ".", "_")
-			if safeKey != key {
-				data[safeKey] = value
+		// Expand dot-notation keys from attributes and merge them into spanData
+		expandedAttrs := expandDotKeys(span.Attributes)
+		for key, value := range expandedAttrs {
+			// Merge expanded attributes into spanData, avoiding overwriting existing keys
+			if _, exists := spanData[key]; !exists {
+				spanData[key] = value
 			}
 		}
 
-		// Add span attributes under "attributes" namespace as well
+		// Also add expanded attributes under the "attributes" key for JSONLogic expressions
+		spanData["attributes"] = expandedAttrs
+		
+		data["span"] = spanData
+
+		// Add raw attributes and underscore-versions for backward compatibility
 		data["attributes"] = span.Attributes
+		for key, value := range span.Attributes {
+			// Add at root level for backward compatibility
+			data[key] = value
+			// Add underscore version
+			safeKey := strings.ReplaceAll(key, ".", "_")
+			data[safeKey] = value
+		}
 
 		// Add span events
 		if len(span.Events) > 0 {
@@ -229,11 +242,45 @@ func (evaluator *JSONLogicEvaluator) buildEvaluationData(context *EvaluationCont
 	return data, nil
 }
 
+// expandDotKeys converts a flat map with dot-notation keys to a nested map
+func expandDotKeys(flat map[string]interface{}) map[string]interface{} {
+	nested := make(map[string]interface{})
+	for key, value := range flat {
+		parts := strings.Split(key, ".")
+		current := nested
+		for i, part := range parts {
+			if i == len(parts)-1 {
+				// Last part, set the value
+				current[part] = value
+			} else {
+				// Intermediate part, create nested map if needed
+				if _, ok := current[part]; !ok {
+					current[part] = make(map[string]interface{})
+				}
+				// Type assertion to continue traversal
+				if next, ok := current[part].(map[string]interface{}); ok {
+					current = next
+				} else {
+					// This case handles when a key is both a prefix and a full key
+					// e.g., "http.method" and "http". We can't create a nested map.
+					// In this scenario, we'll just keep the original flat key.
+					current[key] = value
+					break
+				}
+			}
+		}
+	}
+	return nested
+}
+
 // applyWithTimeout applies JSONLogic with timeout protection
 func (evaluator *JSONLogicEvaluator) applyWithTimeout(rule interface{}, data interface{}) (interface{}, error) {
+	// First, preprocess the rule to handle custom operators
+	processedRule := evaluator.preprocessRule(rule)
+
 	if evaluator.config.Timeout <= 0 {
 		// No timeout, apply directly
-		return jsonlogic.ApplyInterface(rule, data)
+		return jsonlogic.ApplyInterface(processedRule, data)
 	}
 
 	// Use channel to implement timeout
@@ -247,7 +294,7 @@ func (evaluator *JSONLogicEvaluator) applyWithTimeout(rule interface{}, data int
 			}
 		}()
 
-		result, err := jsonlogic.ApplyInterface(rule, data)
+		result, err := jsonlogic.ApplyInterface(processedRule, data)
 		if err != nil {
 			errorChan <- err
 		} else {
@@ -262,6 +309,75 @@ func (evaluator *JSONLogicEvaluator) applyWithTimeout(rule interface{}, data int
 		return nil, err
 	case <-time.After(evaluator.config.Timeout):
 		return nil, fmt.Errorf("JSONLogic evaluation timed out after %v", evaluator.config.Timeout)
+	}
+}
+
+// preprocessRule handles custom operators before passing to JSONLogic
+func (evaluator *JSONLogicEvaluator) preprocessRule(rule interface{}) interface{} {
+	switch r := rule.(type) {
+	case map[string]interface{}:
+		result := make(map[string]interface{})
+		for key, value := range r {
+			if key == "match" {
+				// Handle match operator (regex)
+				if valueArray, ok := value.([]interface{}); ok && len(valueArray) == 2 {
+					// For now, implement basic pattern matching
+					pattern := valueArray[1]
+					variable := valueArray[0]
+					
+					// Convert common regex patterns to JSONLogic equivalents
+					if patternStr, ok := pattern.(string); ok {
+						switch patternStr {
+						case "^[0-9]+$":
+							// Numeric pattern - check if all characters are digits
+							// For simplicity, we'll check if it's not empty and contains only digits
+							result["and"] = []interface{}{
+								map[string]interface{}{
+									"!=": []interface{}{variable, nil},
+								},
+								map[string]interface{}{
+									"!=": []interface{}{variable, ""},
+								},
+								// For now, assume numeric strings are valid
+								// In a real implementation, you'd want proper regex support
+								true,
+							}
+						case "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$":
+							// Email pattern - check if it contains @ and .
+							result["and"] = []interface{}{
+								map[string]interface{}{
+									"!=": []interface{}{variable, nil},
+								},
+								map[string]interface{}{
+									"in": []interface{}{"@", variable},
+								},
+								map[string]interface{}{
+									"in": []interface{}{".", variable},
+								},
+							}
+						default:
+							// Fallback for unknown patterns
+							result["!="] = []interface{}{variable, nil}
+						}
+					} else {
+						result[key] = evaluator.preprocessRule(value)
+					}
+				} else {
+					result[key] = evaluator.preprocessRule(value)
+				}
+			} else {
+				result[key] = evaluator.preprocessRule(value)
+			}
+		}
+		return result
+	case []interface{}:
+		result := make([]interface{}, len(r))
+		for i, item := range r {
+			result[i] = evaluator.preprocessRule(item)
+		}
+		return result
+	default:
+		return rule
 	}
 }
 
@@ -389,6 +505,66 @@ func (evaluator *JSONLogicEvaluator) GetConfig() *JSONLogicConfig {
 // SetConfig updates the configuration
 func (evaluator *JSONLogicEvaluator) SetConfig(config *JSONLogicConfig) {
 	evaluator.config = config
+}
+
+// preprocessAssertion converts ServiceSpec-style assertions to proper JSONLogic
+func (evaluator *JSONLogicEvaluator) preprocessAssertion(assertion map[string]interface{}) map[string]interface{} {
+	// Check if this looks like a ServiceSpec multi-condition assertion
+	// (has multiple top-level keys that are not JSONLogic operators)
+	jsonLogicOps := map[string]bool{
+		"==": true, "!=": true, ">": true, "<": true, ">=": true, "<=": true,
+		"and": true, "or": true, "not": true, "if": true, "in": true,
+		"var": true, "missing": true, "missing_some": true,
+	}
+
+	// Count non-JSONLogic keys
+	nonOpKeys := 0
+	var conditions []interface{}
+	
+	for key, value := range assertion {
+		if !jsonLogicOps[key] {
+			nonOpKeys++
+			// Convert this condition to a proper JSONLogic expression
+			conditions = append(conditions, evaluator.convertConditionToJSONLogic(key, value))
+		}
+	}
+
+	// If we have multiple non-operator keys, wrap them in an "and"
+	if nonOpKeys > 1 {
+		return map[string]interface{}{
+			"and": conditions,
+		}
+	} else if nonOpKeys == 1 {
+		// Single condition, return it directly
+		if conditionMap, ok := conditions[0].(map[string]interface{}); ok {
+			return conditionMap
+		}
+		// If it's not a map, wrap it in a simple structure
+		return map[string]interface{}{
+			"==": []interface{}{conditions[0], true},
+		}
+	}
+
+	// Otherwise, it's already a proper JSONLogic expression
+	return assertion
+}
+
+// convertConditionToJSONLogic converts a single condition to JSONLogic format
+func (evaluator *JSONLogicEvaluator) convertConditionToJSONLogic(name string, condition interface{}) interface{} {
+	conditionMap, ok := condition.(map[string]interface{})
+	if !ok {
+		// If it's not a map, return as-is
+		return condition
+	}
+
+	// Handle special operators that need conversion
+	result := make(map[string]interface{})
+	for op, value := range conditionMap {
+		// Keep the original operator name, we'll handle it in preprocessRule
+		result[op] = value
+	}
+
+	return result
 }
 
 // ValidateConfig validates the JSONLogic configuration

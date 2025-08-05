@@ -370,15 +370,19 @@ func TestStreamingIngestor_ErrorHandling(t *testing.T) {
 func TestStreamingIngestor_EmptyData(t *testing.T) {
 	ingestor := NewStreamingIngestor(nil)
 
-	// Test with empty resource spans
+	// Test with empty resource spans, which is a valid OTLP structure.
 	emptyData := `{"resourceSpans": []}`
 	reader := strings.NewReader(emptyData)
 
 	traceData, err := ingestor.IngestFromReaderStreaming(reader, int64(len(emptyData)))
 
-	assert.Error(t, err)
-	assert.Nil(t, traceData)
-	assert.Contains(t, err.Error(), "no resource spans found")
+	// It should not produce an error.
+	require.NoError(t, err)
+	// It should return a valid, non-nil TraceData object.
+	require.NotNil(t, traceData)
+	// The TraceData object should contain no spans.
+	assert.Len(t, traceData.Spans, 0)
+	assert.Nil(t, traceData.RootSpan)
 }
 
 // Benchmark tests

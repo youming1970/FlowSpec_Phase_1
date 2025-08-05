@@ -156,27 +156,29 @@ func CreateUser(request CreateUserRequest) (*User, error) { ... }
 
 ### Build and Test
 
+This project uses `make` to simplify common development tasks.
+
 ```bash
-# Install dependencies
+# Install or update dependencies
 make deps
 
-# Format code
-make fmt
+# Run all quality checks (formatting, vetting, linting)
+make quality
 
-# Run code checks
-make vet
-
-# Run tests
+# Run all unit tests
 make test
 
-# Generate test coverage report
+# Run tests and generate a coverage report
 make coverage
 
-# Build binary
+# Build the development binary
 make build
 
-# Clean build files
+# Remove all build artifacts and caches
 make clean
+
+# Run all CI checks locally (quality, tests, coverage, build)
+make ci
 ```
 
 ### Project Structure
@@ -189,7 +191,6 @@ flowspec-cli/
 │   ├── ingestor/        # OpenTelemetry trace ingestor
 │   ├── engine/          # Alignment validation engine
 │   └── renderer/        # Report renderer
-├── pkg/                 # Public packages
 ├── testdata/            # Test data
 ├── build/               # Build output
 └── Makefile            # Build scripts
@@ -201,8 +202,8 @@ Check out the example projects in the [examples](examples/) directory to learn h
 
 ## Documentation
 
-- 📖 [API Documentation](docs/API.md) - Detailed API interface documentation
-- 🏗️ [Architecture Document](docs/ARCHITECTURE.md) - Technical architecture and design decisions
+- 📖 [API Documentation](docs/en/API.md) - Detailed API interface documentation
+- 🏗️ [Architecture Document](docs/en/ARCHITECTURE.md) - Technical architecture and design decisions
 - 🤝 [Contribution Guide](CONTRIBUTING.md) - How to participate in project development
 - 📋 [Changelog](CHANGELOG.md) - Version update history
 
@@ -236,7 +237,7 @@ This project is licensed under the Apache-2.0 License. See the [LICENSE](LICENSE
 
 If you encounter problems or have questions, please:
 
-1. 📚 Check the [Documentation](https://github.com/FlowSpec/flowspec_cli/tree/main/docs) and [FAQ](https://github.com/FlowSpec/flowspec_cli/blob/main/docs/FAQ.md)
+1. 📚 Check the [Documentation](https://github.com/FlowSpec/flowspec_cli/tree/main/docs/en) and [FAQ](https://github.com/FlowSpec/flowspec_cli/blob/main/docs/en/FAQ.md)
 2. 🔍 Search existing [GitHub Issues](https://github.com/FlowSpec/flowspec_cli/issues)
 3. 💬 Participate in [GitHub Discussions](https://github.com/FlowSpec/flowspec_cli/discussions)
 4. 🐛 [Create a new Issue](https://github.com/FlowSpec/flowspec_cli/issues/new/choose) to describe your problem

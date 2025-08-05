@@ -111,31 +111,46 @@ type SpanNode struct {
 
 // BuildSpanTree constructs a hierarchical tree structure from the spans in TraceData
 func (td *TraceData) BuildSpanTree() error {
+	// If there are no spans, there is no tree to build. This is a valid state.
 	if len(td.Spans) == 0 {
-		return fmt.Errorf("no spans available to build tree")
+		return nil
 	}
 
-	// Find root span (span with no parent)
-	var rootSpan *Span
+	nodes := make(map[string]*SpanNode, len(td.Spans))
+	var rootNodes []*SpanNode
+
+	// First pass: create all nodes and find potential roots
 	for _, span := range td.Spans {
+		nodes[span.SpanID] = &SpanNode{Span: span}
 		if span.ParentID == "" {
-			rootSpan = span
-			break
+			rootNodes = append(rootNodes, nodes[span.SpanID])
 		}
 	}
 
-	if rootSpan == nil {
-		return fmt.Errorf("no root span found")
+	// Second pass: link children to their parents
+	for _, span := range td.Spans {
+		if span.ParentID != "" {
+			if parentNode, ok := nodes[span.ParentID]; ok {
+				childNode := nodes[span.SpanID]
+				parentNode.Children = append(parentNode.Children, childNode)
+			}
+			// Note: Spans with non-existent parents will be ignored and not part of the tree.
+		}
 	}
 
-	td.RootSpan = rootSpan
-	td.SpanTree = &SpanNode{
-		Span:     rootSpan,
-		Children: []*SpanNode{},
+	// Determine the final root. In a valid trace, there should be exactly one root.
+	// We handle cases with multiple roots gracefully by picking the first one.
+	if len(rootNodes) > 0 {
+		td.RootSpan = rootNodes[0].Span
+		td.SpanTree = rootNodes[0]
+	} else if len(td.Spans) > 0 {
+		// Handle cases where no span has an empty ParentID (e.g., circular dependencies or all spans have parents)
+		// As a fallback, we could pick the span with the earliest start time.
+		// For now, we'll consider this an invalid trace structure.
+		return fmt.Errorf("no root span found (all spans have parents)")
 	}
+	// If len(td.Spans) is 0, we've already returned nil, so no error here.
 
-	// Build the tree recursively
-	td.buildSpanTreeRecursive(td.SpanTree)
 	return nil
 }
 

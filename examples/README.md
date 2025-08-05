@@ -4,38 +4,31 @@ This directory contains example projects for using the FlowSpec CLI, demonstrati
 
 ## Example List
 
+This directory contains an example project for using the FlowSpec CLI.
+
 ### 1. [Simple User Service](simple-user-service/)
 - **Language**: Java
 - **Scenario**: Basic CRUD operations
-- **Features**: Demonstrates basic preconditions and postconditions
-
-### 2. [E-commerce Order Service](ecommerce-order-service/)
-- **Language**: TypeScript
-- **Scenario**: Complex business logic validation
-- **Features**: Multi-step process validation, error handling
-
-### 3. [Microservice Gateway](microservice-gateway/)
-- **Language**: Go
-- **Scenario**: Inter-service communication validation
-- **Features**: Distributed trace validation, performance monitoring
-
-### 4. [Polyglot Project](polyglot-project/)
-- **Language**: Java + TypeScript + Go
-- **Scenario**: Multi-language project integration
-- **Features**: Cross-language service validation
+- **Features**: Demonstrates basic preconditions and postconditions for success and failure scenarios.
 
 ## Quick Start
 
-### Running Examples
+### Running the Example
 
 ```bash
-# Navigate to an example directory
+# Navigate to the example directory
 cd examples/simple-user-service
 
-# Run FlowSpec validation
+# Run FlowSpec validation against a success scenario
 flowspec-cli align \
   --path=./src \
   --trace=./traces/success-scenario.json \
+  --output=human
+
+# Run validation against a precondition failure scenario
+flowspec-cli align \
+  --path=./src \
+  --trace=./traces/precondition-failure.json \
   --output=human
 
 # View the report in JSON format
@@ -44,6 +37,7 @@ flowspec-cli align \
   --trace=./traces/success-scenario.json \
   --output=json
 ```
+
 
 ### Generating Trace Data
 
@@ -75,20 +69,10 @@ ls -la traces/
 
 ## Learning Path
 
-### Beginners
-1.  Start with the [Simple User Service](simple-user-service/).
-2.  Understand the basic format of ServiceSpec annotations.
-3.  Learn how to write simple assertion expressions.
-
-### Intermediate Users
-1.  Examine the complex business logic in the [E-commerce Order Service](ecommerce-order-service/).
-2.  Learn advanced usage of JSONLogic.
-3.  Understand error handling and edge cases.
-
-### Advanced Users
-1.  Study the distributed validation in the [Microservice Gateway](microservice-gateway/).
-2.  Learn performance optimization techniques.
-3.  Explore the integration solution in the [Polyglot Project](polyglot-project/).
+This example demonstrates:
+- Basic format of ServiceSpec annotations in Java.
+- Simple assertion expressions for preconditions and postconditions.
+- How success and failure scenarios are reported.
 
 ## Best Practices
 
@@ -163,8 +147,8 @@ example-name/
 
 If you have any suggestions for the examples or find any issues, please:
 
-1.  Report issues in [GitHub Issues](../../../issues).
-2.  Discuss improvements in [GitHub Discussions](../../../discussions).
+1.  Report issues in [GitHub Issues](https://github.com/FlowSpec/flowspec-cli/issues).
+2.  Discuss improvements in [GitHub Discussions](https://github.com/FlowSpec/flowspec-cli/discussions).
 3.  Submit a Pull Request to contribute a new example.
 
 ---
