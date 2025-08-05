@@ -1,3 +1,17 @@
+// Copyright 2024-2025 FlowSpec
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package renderer
 
 import (
@@ -177,7 +191,7 @@ func TestRenderHuman_DetailedErrors(t *testing.T) {
 	// Add a failed validation detail
 	detail := models.ValidationDetail{
 		Type:          "postcondition",
-		Expression:    `{"==": [{"var": "response.status"}, 200]}`,
+		Expression:    `{\"==\": [{\"var\": \"response.status\"}, 200]}`, // Corrected escaping for inner quotes
 		Expected:      200,
 		Actual:        500,
 		Message:       "Response status check failed",
@@ -218,11 +232,11 @@ func TestRenderJSON(t *testing.T) {
 	output, err := renderer.RenderJSON(report)
 
 	require.NoError(t, err)
-	assert.Contains(t, output, `"summary"`)
-	assert.Contains(t, output, `"results"`)
-	assert.Contains(t, output, `"total": 2`)
-	assert.Contains(t, output, `"success": 1`)
-	assert.Contains(t, output, `"failed": 1`)
+	assert.Contains(t, output, "\"summary\"")
+	assert.Contains(t, output, "\"results\"")
+	assert.Contains(t, output, "\"total\": 2")
+	assert.Contains(t, output, "\"success\": 1")
+	assert.Contains(t, output, "\"failed\": 1")
 
 	// Verify it's valid JSON by checking structure
 	assert.True(t, strings.HasPrefix(strings.TrimSpace(output), "{"))
@@ -293,13 +307,13 @@ func TestValidateJSONOutput(t *testing.T) {
 		},
 		{
 			name:        "malformed JSON",
-			jsonOutput:  `{"invalid": json}`,
+			jsonOutput:  `{\"invalid\": json}`, // Corrected escaping for inner quotes
 			expectError: true,
 			errorMsg:    "JSON is not well-formed",
 		},
 		{
 			name:        "valid JSON but wrong structure",
-			jsonOutput:  `{"wrong": "structure"}`,
+			jsonOutput:  `{\"wrong\": \"structure\"}`, // Corrected escaping for inner quotes
 			expectError: true,
 			errorMsg:    "JSON structure validation failed",
 		},
@@ -328,10 +342,10 @@ func TestGetJSONSchema(t *testing.T) {
 
 	assert.NotEmpty(t, schema)
 	assert.Contains(t, schema, `"$schema"`)
-	assert.Contains(t, schema, `"title": "FlowSpec Alignment Report"`)
-	assert.Contains(t, schema, `"properties"`)
-	assert.Contains(t, schema, `"summary"`)
-	assert.Contains(t, schema, `"results"`)
+	assert.Contains(t, schema, "\"title\": \"FlowSpec Alignment Report\"")
+	assert.Contains(t, schema, "\"properties\"")
+	assert.Contains(t, schema, "\"summary\"")
+	assert.Contains(t, schema, "\"results\"")
 
 	// Verify it's valid JSON
 	var schemaObj interface{}
@@ -369,10 +383,10 @@ func TestRenderJSONWithSchema(t *testing.T) {
 
 			if tt.expectSchema {
 				assert.Contains(t, output, `"$schema"`)
-				assert.Contains(t, output, `"report"`)
+				assert.Contains(t, output, "\"report\"")
 			} else {
 				assert.NotContains(t, output, `"$schema"`)
-				assert.Contains(t, output, `"summary"`)
+				assert.Contains(t, output, "\"summary\"")
 			}
 
 			// Verify it's valid JSON

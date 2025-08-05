@@ -1,3 +1,17 @@
+// Copyright 2024-2025 FlowSpec
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package engine
 
 import (
@@ -56,7 +70,8 @@ func (evaluator *JSONLogicEvaluator) EvaluateAssertion(assertion map[string]inte
 			Actual:     true,
 			Expression: "empty_assertion",
 			Message:    "Empty assertion always passes",
-		}, nil
+		},
+	nil
 	}
 
 	// Build evaluation data from context
@@ -68,6 +83,8 @@ func (evaluator *JSONLogicEvaluator) EvaluateAssertion(assertion map[string]inte
 	// Check if this is a multi-condition assertion (ServiceSpec format)
 	// If so, convert it to a proper JSONLogic "and" expression
 	processedAssertion := evaluator.preprocessAssertion(assertion)
+
+
 
 	// Validate assertion before evaluation if in strict mode
 	if evaluator.config.StrictMode {
@@ -87,7 +104,8 @@ func (evaluator *JSONLogicEvaluator) EvaluateAssertion(assertion map[string]inte
 			Expression: string(assertionJSON),
 			Message:    fmt.Sprintf("JSONLogic evaluation failed: %v", err),
 			Error:      err,
-		}, nil
+		},
+	nil
 	}
 
 	// Convert result to boolean
@@ -100,7 +118,8 @@ func (evaluator *JSONLogicEvaluator) EvaluateAssertion(assertion map[string]inte
 		Actual:     result,
 		Expression: string(assertionJSON),
 		Message:    evaluator.buildResultMessage(passed, assertion, result),
-	}, nil
+	},
+	nil
 }
 
 // ValidateAssertion implements the AssertionEvaluator interface
@@ -188,6 +207,14 @@ func (evaluator *JSONLogicEvaluator) buildEvaluationData(context *EvaluationCont
 			data[safeKey] = value
 		}
 
+		// Also add the expanded nested structure to the root level
+		// This allows JSONLogic to access "request.id" as nested path
+		for key, value := range expandedAttrs {
+			if _, exists := data[key]; !exists {
+				data[key] = value
+			}
+		}
+
 		// Add span events
 		if len(span.Events) > 0 {
 			events := make([]map[string]interface{}, len(span.Events))
@@ -258,7 +285,7 @@ func expandDotKeys(flat map[string]interface{}) map[string]interface{} {
 					current[part] = make(map[string]interface{})
 				}
 				// Type assertion to continue traversal
-				if next, ok := current[part].(map[string]interface{}); ok {
+			if next, ok := current[part].(map[string]interface{}); ok {
 					current = next
 				} else {
 					// This case handles when a key is both a prefix and a full key
@@ -358,7 +385,7 @@ func (evaluator *JSONLogicEvaluator) preprocessRule(rule interface{}) interface{
 						default:
 							// Fallback for unknown patterns
 							result["!="] = []interface{}{variable, nil}
-						}
+							}
 					} else {
 						result[key] = evaluator.preprocessRule(value)
 					}
@@ -517,7 +544,17 @@ func (evaluator *JSONLogicEvaluator) preprocessAssertion(assertion map[string]in
 		"var": true, "missing": true, "missing_some": true,
 	}
 
-	// Count non-JSONLogic keys
+	// Check if this is already a proper JSONLogic expression
+	if len(assertion) == 1 {
+		for key := range assertion {
+			if jsonLogicOps[key] {
+				// It's already a JSONLogic expression, return as-is
+				return assertion
+			}
+		}
+	}
+
+	// Count non-JSONLogic keys and convert them
 	nonOpKeys := 0
 	var conditions []interface{}
 	
@@ -526,6 +563,9 @@ func (evaluator *JSONLogicEvaluator) preprocessAssertion(assertion map[string]in
 			nonOpKeys++
 			// Convert this condition to a proper JSONLogic expression
 			conditions = append(conditions, evaluator.convertConditionToJSONLogic(key, value))
+		} else {
+			// It's a JSONLogic operator at the top level, keep as-is
+			return assertion
 		}
 	}
 
@@ -560,8 +600,18 @@ func (evaluator *JSONLogicEvaluator) convertConditionToJSONLogic(name string, co
 	// Handle special operators that need conversion
 	result := make(map[string]interface{})
 	for op, value := range conditionMap {
-		// Keep the original operator name, we'll handle it in preprocessRule
-		result[op] = value
+		// Convert to proper JSONLogic format with array parameters
+		switch op {
+		case "==", "!=", ">", "<", ">=", "<=":
+			// These operators need array format: {"op": [var, value]}
+			result[op] = []interface{}{map[string]interface{}{"var": name}, value}
+		case "in":
+			// "in" operator: {"in": [needle, haystack]}
+			result[op] = []interface{}{value, map[string]interface{}{"var": name}}
+		default:
+			// For other operators, keep as-is but ensure proper format
+			result[op] = value
+		}
 	}
 
 	return result

@@ -7,16 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Complete project documentation suite.
-- Apache-2.0 open source license.
-- Contribution guide and development documentation.
-
-### Changed
-- Optimized README.md format and content.
-- Improved Makefile build scripts.
-
-## [0.1.0] - 2024-01-XX (Planned)
+## [0.1.0] - 2025-08-05
 
 ### Added
 - 🎉 First release of FlowSpec CLI Phase 1 MVP.
